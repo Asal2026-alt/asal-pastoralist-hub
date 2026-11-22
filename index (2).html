@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ASAL-Pastoralist Hub (public)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* VOICE: a public evidence commons for pastoralist counties: confident, plain, every record traceable to a source and two people who approved it
+   IDEA: a field officer's county ledger: rows of counties, columns of evidence types, a tray of unconfirmed slips and a panel that signs them off
+   PICTURE: county x record-type coverage grid in the band; on the economy tab, bars of each county's output with its green potential added
+   COLOUR and TYPE: dry-season ochre band, sand ground, charcoal ink, shuka red only for decisions, green only for growth potential; Archivo
+   LAYOUT: ochre band with title, promise, audiences, figures and grid; sticky tabs; one working view at a time */
+:root{color-scheme:light dark;
+--bg:light-dark(#f6f1e7,#15120e);--panel:light-dark(#fffdf8,#1f1a14);--ink:light-dark(#1f1b16,#efe6d8);--mute:light-dark(#6a5f52,#a99c8a);
+--line:light-dark(#e3d8c5,#3a3127);--band:light-dark(#dda24c,#5c3f17);--bandink:light-dark(#1f1b16,#fbf1df);--bandline:light-dark(#b9813a,#7d5a26);
+--red:light-dark(#b8301f,#ff7a63);--redbg:light-dark(#fbe3dd,#3d1a14);--blue:light-dark(#24526e,#8fc3df);--green:light-dark(#3d6b2f,#9fcf8a);--greenbar:light-dark(#5f9a45,#7fbf62);--greybar:light-dark(#b9ab95,#6b5f4f);
+--c1:light-dark(#f2dcb0,#4a3519);--c2:light-dark(#d9a75a,#7a5622);--c3:light-dark(#a8702a,#b07d34);--c4:light-dark(#6e4614,#e3b064)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Archivo,system-ui,sans-serif;overflow-x:clip}
+.band{padding:clamp(24px,4vw,52px) max(5vw,16px)}
+.wrap{max-width:1240px;margin:0 auto}
+.top{background:var(--band);color:var(--bandink)}
+h1{font-size:clamp(32px,5vw,48px);line-height:1.05;margin:0 0 8px;font-weight:800;text-wrap:balance}
+.tag{font-size:clamp(21px,2.8vw,28px);line-height:1.2;font-weight:700;max-width:32ch;margin:4px 0 12px;text-wrap:balance}
+.lead{max-width:68ch;margin:0 0 20px;font-size:17px}
+.aud{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:12px;margin:0 0 20px}
+.aud div{background:light-dark(rgba(255,252,244,.6),rgba(0,0,0,.28));border-radius:8px;padding:14px 16px;font-size:15px}
+.aud b{display:block;font-size:17px;margin-bottom:4px}
+.cta{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 10px}
+.cta a{min-height:44px;display:inline-flex;align-items:center;padding:0 18px;border-radius:6px;font-weight:700;text-decoration:none}
+.cta a.p{background:var(--bandink);color:var(--band)}.cta a.s{border:2px solid var(--bandink);color:var(--bandink)}
+.cta a:focus-visible,.srcline a:focus-visible{outline:3px solid var(--bandink);outline-offset:2px}
+.srcline{font-size:13px;margin:0 0 24px;max-width:80ch}.srcline a{color:inherit}
+.figs{display:flex;flex-wrap:wrap;gap:12px 36px;margin-bottom:22px}
+.fig b{display:block;font-size:clamp(28px,4vw,40px);line-height:1;font-weight:800}
+.fig span{font-size:14px}
+.fig.hot b{color:var(--red)}
+.scroll{overflow-x:auto}
+table.grid{border-collapse:collapse;width:100%;min-width:640px;font-size:14px}
+.grid th{font-weight:600;text-align:left;padding:6px 8px;border-bottom:1px solid var(--bandline);white-space:nowrap}
+.grid thead th{text-align:center}.grid thead th:first-child{text-align:left}
+.grid td{padding:3px;text-align:center;border-bottom:1px solid var(--bandline)}
+.cell{width:100%;min-height:36px;border:0;border-radius:4px;font:600 15px Archivo,sans-serif;cursor:pointer;color:var(--bandink);background:transparent}
+.cell.l1{background:var(--c1);color:light-dark(#1f1b16,#fbf1df)}.cell.l2{background:var(--c2);color:light-dark(#1f1b16,#fbf1df)}.cell.l3{background:var(--c3);color:#fff}.cell.l4{background:var(--c4);color:light-dark(#fff,#1f1b16)}
+.cell:hover,.cell:focus-visible{outline:2px solid var(--bandink);outline-offset:-2px}
+.pdot{min-width:36px;min-height:32px;border:0;border-radius:16px;background:var(--red);color:#fff;font:700 14px Archivo,sans-serif;cursor:pointer}
+.gridnote{font-size:13px;margin:8px 0 0}
+nav.tabs{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+nav.tabs .wrap{display:flex;gap:2px;flex-wrap:wrap;padding:0 max(5vw,16px)}
+nav.tabs a{padding:14px 12px;color:var(--mute);text-decoration:none;font-weight:600;border-bottom:3px solid transparent}
+nav.tabs a[aria-selected=true]{color:var(--ink);border-color:var(--band)}
+.cnt{color:var(--red)}
+h2{font-size:28px;line-height:1.1;margin:0 0 6px}
+h3.sec{font-size:21px;margin:30px 0 8px}
+.sub{color:var(--mute);margin:0 0 18px;max-width:72ch}
+.slip,.rec,.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;margin:0 0 12px}
+.slip,.card{padding:16px 18px}.slip{border-left:5px solid var(--red)}
+.slip.ready{border-left-color:var(--green)}
+.slip h3,.card h3{font-size:18px;margin:6px 0}
+.slip p,.card p{margin:6px 0}
+.meta,.rm{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.chip{font-size:13px;padding:2px 8px;border-radius:10px;background:light-dark(#efe5d3,#2e261d);white-space:nowrap}
+.chip.cb{background:var(--redbg);color:var(--red)}.chip.cf{background:light-dark(#e2eedb,#1d2d18);color:var(--green)}.chip.cbo{background:light-dark(#dfe9f0,#16242d);color:var(--blue)}
+.mute{color:var(--mute);font-size:14px}
+.why{background:light-dark(#fbf3e2,#2a2216);padding:6px 10px;border-radius:6px;font-size:15px}
+.tally{font-size:15px}.tally b{font-size:16px}
+.src a,.card a,.rb a,.why a{color:var(--blue);overflow-wrap:anywhere}
+.acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;align-items:center}
+.btn{min-height:44px;padding:0 16px;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--ink);font:600 15px Archivo,sans-serif;cursor:pointer}
+.btn.pri{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn.ok{background:var(--green);color:var(--bg);border-color:var(--green)}
+.btn.warn{color:var(--red);border-color:var(--red)}
+.btn:disabled{opacity:.5;cursor:wait}
+.btn:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.note{flex:1 1 180px;max-width:300px}
+input,select,textarea{font:16px Archivo,sans-serif;min-height:44px;padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--ink);width:100%}
+input[type=range]{padding:0;border:0;background:transparent;accent-color:var(--green)}
+textarea{min-height:0}
+.filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,170px),1fr));gap:10px;margin-bottom:10px}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:end;justify-content:space-between;margin-bottom:14px}
+.bar label{flex:1 1 220px;max-width:380px}
+.rec summary{padding:14px 16px;cursor:pointer;display:grid;gap:6px;list-style:none}
+.rec summary::-webkit-details-marker{display:none}
+.rt{font-weight:600;font-size:17px}
+.rb{padding:0 16px 16px;border-top:1px solid var(--line)}
+.rb p{margin:10px 0}
+details.adm{margin-top:10px;border-top:1px dashed var(--line);padding-top:8px}
+details.adm summary{cursor:pointer;font-weight:600;min-height:32px}
+.form{display:grid;gap:12px;margin-top:12px}
+.form label{display:grid;gap:4px;font-weight:600;font-size:14px}
+.form small{font-weight:400;color:var(--mute)}
+.row3{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:12px}
+fieldset{border:1px solid var(--line);border-radius:6px;padding:8px 10px;display:flex;flex-wrap:wrap;gap:2px 14px}
+legend{font-weight:600;font-size:14px;padding:0 4px}
+.ck{display:flex!important;align-items:center;gap:6px;font-weight:400!important;min-height:36px}
+.ck input{width:20px;min-height:20px}
+.empty{padding:28px;text-align:center;color:var(--mute);background:var(--panel);border:1px dashed var(--line);border-radius:8px}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:14px;margin:18px 0 26px;padding:0;list-style:none;counter-reset:s}
+.steps li{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:16px;counter-increment:s}
+.steps li::before{content:counter(s);display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--band);color:var(--bandink);font-weight:800;margin-bottom:8px}
+.steps b{display:block;margin-bottom:4px}
+table.log{border-collapse:collapse;width:100%;font-size:15px}
+.log th,.log td{text-align:left;padding:8px;border-bottom:1px solid var(--line);vertical-align:top}
+.log td.n,.log th.n{text-align:right;white-space:nowrap}
+.plist{display:grid;gap:8px;margin:10px 0}
+.prow{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 14px}
+.hits{display:grid;gap:6px;margin-top:8px}
+.econtop{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:18px;align-items:end;margin:8px 0 18px}
+.big{font-size:clamp(30px,4.5vw,46px);font-weight:800;line-height:1}
+.big small{font-size:16px;font-weight:600;color:var(--mute)}
+.presets{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.presets button{min-height:40px;min-width:56px}
+.presets button[aria-pressed=true]{background:var(--green);color:var(--bg);border-color:var(--green)}
+.erow{display:grid;grid-template-columns:8.5em minmax(0,1fr) 11.5em;gap:10px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line)}
+.erow b{font-weight:600}
+.track{display:flex;height:20px;border-radius:3px;overflow:hidden}
+.track i{display:block;height:100%}
+.track i.t{background:var(--greybar)}.track i.a{background:var(--greenbar)}
+.ev{font-size:14px;text-align:right;white-space:nowrap}
+.ev small{display:block;color:var(--mute);font-size:13px}
+.legend{display:flex;flex-wrap:wrap;gap:16px;font-size:14px;margin:6px 0 4px}
+.legend span::before{content:'';display:inline-block;width:12px;height:12px;border-radius:2px;margin-right:6px;vertical-align:-1px;background:var(--greybar)}
+.legend span.a::before{background:var(--greenbar)}
+.paths{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr));gap:12px}
+.paths .card{margin:0}
+.paths ul{margin:6px 0 8px;padding-left:20px}
+.paths li{margin:3px 0}
+.efstats{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:12px;margin:12px 0}
+.efstats div{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px 16px}
+.efstats b{display:block;font-size:clamp(24px,3vw,32px);line-height:1.1;margin-bottom:4px}
+.efstats span{font-size:14px;color:var(--mute)}
+.meter{height:16px;background:var(--line);border-radius:3px;overflow:hidden;margin:12px 0 4px}.meter i{display:block;height:100%;background:var(--greenbar)}
+.dlist{padding-left:20px;max-width:80ch}.dlist li{margin:6px 0}
+h4.sec{font-size:18px;margin:22px 0 8px}
+.answer{background:var(--panel);border:1px solid var(--line);border-left:5px solid var(--blue);border-radius:8px;padding:16px 18px;margin:12px 0}
+.answer p{margin:8px 0;max-width:75ch}
+.tierchip.t1{background:#e6f2ea;color:#1d5b34;border-color:#9cc8ab}.tierchip.t2{background:#fff3dc;color:#7a4b00;border-color:#e2bf7a}.tierchip.t3{background:#fde7e7;color:#8a1f1f;border-color:#e0a2a2}
+.audit{border-left:4px solid var(--blue);background:var(--panel);padding:6px 10px;font-size:14px;margin:6px 0}
+.fund{font-size:15px;margin:6px 0}
+.pill{display:inline-block;min-width:2em;text-align:center;padding:2px 6px;border-radius:10px;color:var(--mute)}.pill.on{background:var(--greenbar);color:#fff;font-weight:700}
+details.more{border:1px solid var(--line);border-radius:8px;padding:8px 12px;margin:8px 0}details.more summary{cursor:pointer;font-weight:600}
+details.adm{margin-top:8px;border-top:1px dashed var(--line);padding-top:6px}details.adm summary{cursor:pointer;font-weight:600}
+.early{border-left:4px solid var(--amber,#c98a00);background:var(--panel);padding:6px 10px;font-size:14px;margin:6px 0}
+.chip.unck{background:#fff3dc;color:#7a4b00;border-color:#e2bf7a}
+.explain{background:var(--panel);color:var(--ink);border:1px solid var(--line);border-left:6px solid var(--greenbar);border-radius:10px;padding:18px 22px;margin:0 0 22px;position:relative}
+.explain h2{margin:0 0 6px;font-size:22px}.explain>p{max-width:75ch;margin:6px 0}
+.exgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:12px 20px;margin:12px 0 6px}
+.exgrid b{display:block;margin-bottom:2px}.exgrid p{margin:0;font-size:15px}
+.exclose{position:absolute;top:10px;right:10px}
+.exopen{background:none;border:0;color:inherit;text-decoration:underline;cursor:pointer;font:inherit;padding:0}
+.mapwrap{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:20px;align-items:start;margin:12px 0}
+@media(max-width:800px){.mapwrap{grid-template-columns:1fr}}
+#kmap{width:100%;height:auto;max-height:78vh;display:block;--mapoff:light-dark(#ece6db,#2a241d);--mapline:light-dark(#ffffff,#15120e)}
+#kmap path.mc{cursor:pointer}#kmap path.mc:hover,#kmap path.mc:focus{stroke:var(--ink);stroke-width:2;outline:none}
+.mlab{font-size:9px;font-weight:600;fill:var(--ink);text-anchor:middle;pointer-events:none;paint-order:stroke;stroke:var(--bg);stroke-width:2.5px}
+#mapside{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px 16px}#mapside h3{margin:0 0 6px}
+.stackbar{display:flex;height:22px;border-radius:4px;overflow:hidden;background:var(--line);margin:8px 0}.stackbar i{display:block;height:100%}
+.s1{background:#2e8b4e!important}.s4{background:#7a9a3a!important}
+.mixgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr));gap:6px 22px;margin:6px 0 10px}.mixrow{display:grid;grid-template-columns:minmax(0,1fr) 110px 3em;gap:4px 8px;align-items:center;font-size:14px}.mixrow .mute{grid-column:1/-1;font-size:12.5px;margin-top:-4px}.s2{background:#d9b15f!important}.s3{background:#1f6f8b!important}
+.mctl{display:flex;flex-wrap:wrap;gap:14px 26px;align-items:end;margin:10px 0}.mctl label{display:grid;gap:4px;min-width:220px}
+.mctl output{font-weight:800;font-size:22px}
+.seg button[aria-pressed=true],.mctl .presets button[aria-pressed=true]{background:var(--green);color:var(--bg);border-color:var(--green)}
+.mleg{display:flex;flex-wrap:wrap;gap:14px;font-size:14px;margin:4px 0}.mleg i,.sw{display:inline-block;width:13px;height:13px;border-radius:2px;margin-right:6px;vertical-align:-1px;border:1px solid var(--line)}
+ul.crit{padding-left:18px;margin:6px 0}ul.crit li{margin:5px 0}
+.pchecks{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+#status{font-weight:600}
+.toast{position:fixed;left:50%;bottom:20px;transform:translate(-50%,40px);opacity:0;background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:8px;transition:.25s;max-width:90vw;z-index:9}
+.toast.show{opacity:1;transform:translate(-50%,0)}.toast.bad{background:var(--red);color:#fff}
+@media(prefers-reduced-motion:reduce){.toast{transition:none}}
+@media(max-width:600px){table{font-size:13px}.stack thead{display:none}.stack tr{display:grid;padding-block:10px}.stack td{display:flow-root;border:0;padding:3px 0;padding-inline-start:8em;text-align:start}.stack td::before{content:attr(data-l);float:inline-start;width:7.5em;margin-inline-start:-8em;white-space:normal}.stack td:empty{display:none}
+.erow{grid-template-columns:1fr auto;gap:4px 10px}.erow .track{grid-column:1/-1;grid-row:2}}
+</style>
+<script>new MutationObserver(()=>{for(const c of document.querySelectorAll('.stack td:not([data-l])')){let i=0,p=c;while(p=p.previousElementSibling)i+=p.colSpan;c.dataset.l=c.closest('table').rows[0].cells[i]?.textContent||''}}).observe(document,{childList:true,subtree:true})</script>
+</head>
+<body>
+<header class="top band"><div class="wrap">
+<section class="explain" id="explain" aria-labelledby="exh">
+<button class="btn exclose" id="exclose" aria-label="Close this explainer">Close</button>
+<h2 id="exh">New here? The hub in one minute</h2>
+<p>This is a free, public library about Kenya's 15 pastoralist counties, run by the ASAL Humanitarian Network (AHN). It gathers evidence that pastoralism is the backbone economy of the drylands, and that herders turn changing rain and pasture into milk, meat, trade and healthy land.</p>
+<div class="exgrid">
+<div><b>What you'll find</b><p>Studies from the last 30 years, court cases and laws, community land titles, carbon projects, county budgets and the Equalisation Fund, and who funds what in each county.</p></div>
+<div><b>How to use it</b><p>Tap a county in the table below, or open the Register and filter by county or topic. Every item links to its original public source.</p></div>
+<div><b>Why you can trust it</b><p>A weekly search finds new items and AHN reviewers check them. Items marked "Not yet checked" come from official documents but have not been reviewed yet. Audit findings are shown as queries, not wrongdoing.</p></div>
+<div><b>Names</b><p>We only name an organisation or person when a public document already names them, or with their consent.</p></div>
+<div><b>Take part</b><p>To comment, suggest a study, case or project, or correct a mistake, open the <a href="https://claude.ai/artifact/GnhYJfm2wyMUk3mZjHHnkT" target="_blank" rel="noopener">full hub on claude.ai</a> (free account). To become a reviewer, write to <a href="mailto:info@asalnetwork.org">info@asalnetwork.org</a>.</p></div>
+</div>
+</section>
+<p class="gridnote" id="exagain" hidden><button class="exopen" id="exopen">New here? What this hub is</button></p>
+<h1>ASAL-Pastoralist Hub</h1>
+<p class="tag">Pastoralism is the backbone economy of Kenya's arid and semi-arid lands. Let's build the evidence that shows it.</p>
+<p class="lead">These 15 arid and semi-arid counties are too often described by drought and scarcity. Yet pastoralism contributes about 10% of Kenya's GDP and half of its agricultural GDP. Herders turn variable rain and pasture into milk, meat, trade and healthy rangelands: variability is a resource to work with, not a failure to fix. This hub brings together 30 years of research, court cases, carbon projects, community land titles and county funds, so everyone can see what is known, what is contested, and where pastoral green economies can grow.</p>
+<div class="aud">
+<div><b>Pastoralist communities</b>Know your rights over land, carbon deals and county funds, and learn from cases other communities have won.</div>
+<div><b>Researchers and students</b>Find studies from the last 30 years, see where evidence is missing, and choose topics that matter to herders.</div>
+<div><b>Counties, partners and funders</b>Plan and budget for green, productive rangelands, based on evidence that values pastoralism.</div>
+</div>
+<div class="cta"><a class="p" href="#case">Why invest in the drylands</a><a class="s" href="#map">See the green map</a><a class="s" href="#economy">County economies</a><a class="s" href="#register">Browse the register</a><a class="s" href="https://claude.ai/artifact/GnhYJfm2wyMUk3mZjHHnkT" target="_blank" rel="noopener">Comment or suggest on the full hub</a></div>
+<p class="srcline">GDP figures: <a href="https://doi.org/10.3389/past.2025.14334" target="_blank" rel="noopener">Ndiritu et al. 2025, Pastoralism 15</a>. A weekly search finds new items. Anyone can comment. Items copied from official or published sources (tier 1) appear straight away, marked "not yet checked"; everything else enters the register only after reviewers on the right panel approve it.</p>
+<div class="figs">
+<div class="fig"><b id="nRec">0</b><span>records in the register</span></div>
+<div class="fig hot"><b id="nPend">0</b><span>waiting for review</span></div>
+<div class="fig"><b id="nPanel">0</b><span>reviewers on the panels</span></div>
+<div class="fig"><b id="lastRun" style="font-size:22px;padding-top:10px">Not run yet</b><span>last update</span></div>
+</div>
+<div class="scroll"><table class="grid" id="grid"></table></div>
+<p class="gridnote">Each cell counts approved records for a county and type; tap one to open them. Red numbers are items waiting for review.</p>
+<p id="status" class="gridnote">Loading the shared register…</p>
+</div></header>
+
+<nav class="tabs" aria-label="Sections"><div class="wrap">
+<a href="#review" id="t-review">Review queue <span class="cnt" id="tabPend"></span></a>
+<a href="#register" id="t-register">Register</a>
+<a href="#case" id="t-case">Why invest</a>
+<a href="#economy" id="t-economy">County economies</a>
+<a href="#map" id="t-map">Green map</a>
+<a href="#partners" id="t-partners">Partners and investment</a>
+<a href="#add" id="t-add">Suggest</a>
+<a href="#inbox" id="t-inbox" hidden>Inbox <span class="cnt" id="tabInbox"></span></a>
+<a href="#panel" id="t-panel">Reviewer panel</a>
+<a href="#how" id="t-how">How it works</a>
+</div></nav>
+
+<main class="band"><div class="wrap">
+<section id="v-review" hidden>
+<h2>Review queue</h2>
+<p class="sub" id="reviewSub">Each item was found by search or suggested by someone and has not been approved yet. It enters the register when reviewers on the right panel approve it.</p>
+<div class="bar">
+<label><span class="mute">Show</span><select id="rshow"><option value="all">All items</option><option value="mypanel">My panel's items</option><option value="mine">Assigned to me</option><option value="needs">Needs my vote</option><option value="ready">Ready to move</option><option value="t3">Tier 3 (sensitive)</option></select></label>
+<label><span class="mute">Batch</span><select id="rbatch"></select></label>
+<button class="btn" id="bulk" data-act="bulk" hidden>Approve whole batch</button>
+</div>
+<div id="rlist"></div>
+</section>
+
+<section id="v-register" hidden>
+<h2>Register</h2>
+<p class="sub">Approved records, plus tier 1 items from official or published sources, which appear straight away and are marked "not yet checked" until a reviewer confirms them. Open a record to see its sources, linked records and who approved it. Spot a mistake? Use Suggest an edit or Comment on the record.</p>
+<div class="filters">
+<label><span class="mute">County</span><select id="fc"></select></label>
+<label><span class="mute">Type</span><select id="fk"></select></label>
+<label><span class="mute">Theme</span><select id="ft"></select></label>
+<label><span class="mute">Lens</span><select id="fl"><option value="">All</option><option>Bias</option><option>Friendly</option><option>Both</option></select></label>
+<label><span class="mute">Search</span><input id="fq" type="search" placeholder="Title, summary, notes"></label>
+</div>
+<div class="bar"><span id="rcount" class="mute"></span><span><button class="btn" id="clear">Clear filters</button> <button class="btn" data-act="csv">Copy as CSV</button></span></div>
+<div id="reg"></div>
+</section>
+
+<section id="v-economy" hidden>
+<h2>County economies and green potential</h2>
+<p class="sub" id="econLead"></p>
+<div class="econtop">
+<div><span class="mute">Combined output of the 15 counties, 2024</span><div class="big" id="eToday"></div></div>
+<div><span class="mute">With enabler investment lifting output by</span><div class="big" id="eScen"></div>
+<input type="range" id="uplift" min="20" max="100" step="10" value="40" aria-label="Uplift from enabler investment, percent">
+<div class="presets" id="presets"></div></div>
+</div>
+<div class="legend"><span>2024 output (Gross County Product)</span><span class="a">Added by the scenario</span></div>
+<div id="ebars"></div>
+<p class="mute">Source: KNBS Gross County Product 2025 (2024 data), as listed on <a href="https://en.wikipedia.org/wiki/List_of_counties_of_Kenya_by_Gross_County_Product" target="_blank" rel="noopener">Wikipedia's county GCP table</a>; check against the <a href="https://www.knbs.or.ke/gross-county-product/" target="_blank" rel="noopener">KNBS report</a> before citing. The scenario is simple arithmetic on 2024 output, not a forecast: what a county gains depends on which enablers are funded, how well, and over how many years.</p>
+
+<h3 class="sec">How each county can turn green</h3>
+<p class="sub">Enablers to test, drawn from the research and cases in this hub. They are options for discussion with each county, not findings.</p>
+<div class="paths" id="paths"></div>
+
+<h3 class="sec">Equalisation Fund: what is owed and what arrives</h3>
+<p class="sub">Article 204 of the Constitution gives the fund 0.5% of national revenue every year, to bring water, roads, health facilities and electricity in marginalised areas up to the national standard. Far less has actually been paid in.</p>
+<div class="efstats">
+<div><b>KSh 9.6bn</b><span>entitlement for 2026/27, 0.5% of audited national revenue</span></div>
+<div><b>22%</b><span>of the KSh 60bn owed from 2010 to June 2024 actually paid in (KSh 13.4bn)</span></div>
+<div><b>KSh 48bn+</b><span>still owed to the fund: about five years of entitlement, or roughly $370m</span></div>
+<div><b>Aug 2030</b><span>when Article 204 lapses unless Parliament extends it</span></div>
+</div>
+<div class="meter" role="img" aria-label="22.4% of the amount owed to the fund from 2010 to June 2024 has been paid in"><i style="width:22.4%"></i></div>
+<p class="mute">Green: share of the fund's constitutional entitlement actually paid in, 2010 to June 2024. The KSh 48bn still owed equals about 2.8% of the 15 counties' combined 2024 output (our arithmetic at 2024 exchange rates).</p>
+
+<h4 class="sec">What has changed</h4>
+<div class="scroll"><table class="log stack"><thead><tr><th>When</th><th>What happened</th></tr></thead><tbody>
+<tr><td>Jul 2026</td><td>CRA begins reviewing the marginalisation policy that decides which areas qualify. Governors of the original 14 counties press to refocus the fund.</td></tr>
+<tr><td>2026/27</td><td>KSh 9.6bn listed for the fund in the Division of Revenue Bill, against KSh 420bn for county equitable shares.</td></tr>
+<tr><td>May 2026</td><td>Senate passes the 2025 Appropriation Bill: KSh 16.8bn, made up of KSh 6.2bn rolled over, KSh 7.85bn entitlement and KSh 2.75bn arrears, for 1,424 areas in 34 counties.</td></tr>
+<tr><td>2024/25</td><td>Treasury cuts the year's allocation from KSh 6.2bn to KSh 2.5bn; arrears pass KSh 50bn by one count.</td></tr>
+<tr><td>2024</td><td>IBEC resolution: Treasury to clear about KSh 10bn of arrears a year from 2024/25.</td></tr>
+<tr><td>2018</td><td>Second policy: the unit changes from counties to sub-locations, covering 1,424 areas in 34 counties.</td></tr>
+<tr><td>2013</td><td>First policy: 14 marginalised counties, KSh 11.8bn of projects.</td></tr>
+</tbody></table></div>
+
+<h4 class="sec">2025/26 allocations to the hub's counties</h4>
+<div class="scroll"><table class="log stack"><thead><tr><th>County</th><th class="n">2025/26 allocation</th><th>In the original 14?</th></tr></thead><tbody>
+<tr><td>Turkana</td><td class="n">KSh 1.86bn</td><td>Yes</td></tr>
+<tr><td>West Pokot</td><td class="n">KSh 1.66bn to 1.7bn</td><td>Yes</td></tr>
+<tr><td>Narok</td><td class="n">KSh 1.25bn to 1.3bn</td><td>Yes</td></tr>
+<tr><td>Mandera</td><td class="n">KSh 1.22bn</td><td>Yes</td></tr>
+<tr><td>Wajir</td><td class="n">KSh 1.18bn</td><td>Yes</td></tr>
+<tr><td>Samburu</td><td class="n">KSh 1.05bn to 1.1bn</td><td>Yes</td></tr>
+<tr><td>Garissa</td><td class="n">about KSh 1.0bn</td><td>Yes</td></tr>
+<tr><td>Baringo</td><td class="n">KSh 967m</td><td>No, added in 2018</td></tr>
+<tr><td>Marsabit</td><td class="n">KSh 764m</td><td>Yes</td></tr>
+<tr><td>Kajiado</td><td class="n">KSh 99m (three constituencies)</td><td>No</td></tr>
+<tr><td>Isiolo, Tana River, Lamu</td><td class="n">not yet found</td><td>Yes</td></tr>
+<tr><td>Elgeyo Marakwet, Laikipia</td><td class="n">not yet found</td><td>No</td></tr>
+</tbody></table></div>
+<p class="mute">Ranges show small differences between the Senate bill and the final figures as reported. Check the schedule of the Equalisation Fund Appropriation Act, 2025 before citing.</p>
+
+<h4 class="sec">Where the debate stands</h4>
+<ul class="dlist">
+<li><b>Refocus on the original 14 counties:</b> pressed by those counties' governors, and by the Treasury Cabinet Secretary, who told Parliament the expansion to 34 counties was a mistake.</li>
+<li><b>Keep the wider reach:</b> supporters say the 2018 policy corrected anomalies by reaching neglected communities wherever they live.</li>
+<li><b>Scrap the fund:</b> the Treasury Cabinet Secretary has also proposed ending it, arguing the money is spread too thin to matter.</li>
+<li><b>Pay what is owed:</b> the Controller of Budget reports at least KSh 48bn still owed, delaying projects in counties such as Turkana, West Pokot, Wajir, Narok, Samburu, Mandera, Garissa, Baringo and Marsabit.</li>
+</ul>
+<p class="mute">Sources: <a href="https://peopledaily.digital/insights/equalisation-fund-a-constitutional-right-still-waiting-to-be-realised/amp" target="_blank" rel="noopener">People Daily on the 2025 Appropriation Bill and arrears</a> · <a href="https://new.mzalendo.com/legislative-trends/bills/na/441/" target="_blank" rel="noopener">Division of Revenue Bill, 2026</a> · <a href="https://nation.africa/kenya/counties/cob-sounds-alarm-over-sh10bn-equalisation-fund-gap-5325094" target="_blank" rel="noopener">Nation on the Controller of Budget report</a> · <a href="https://www.kenyans.co.ke/news/114714-turkana-west-pokot-among-34-counties-get-ksh168-billion-equalisation-fund" target="_blank" rel="noopener">Kenyans.co.ke on county allocations</a> · <a href="https://peopledaily.digital/news/counties-to-get-sh16-8b-from-equalisation-fund-to-support-service-delivery/amp" target="_blank" rel="noopener">People Daily on the Senate bill</a> · <a href="https://nation.africa/kenya/news/why-mbadi-wants-parliament-to-change-equalisation-fund-policy-5606724" target="_blank" rel="noopener">Nation on the Treasury CS's position</a> · <a href="https://the-star.co.ke/news/2026-07-01-cra-review-sparks-row-over-allocation-of-equalisation-fund" target="_blank" rel="noopener">The Star on the 2026 review</a></p>
+
+<h3 class="sec">Is low county output used to decide where money goes?</h3>
+<div class="answer">
+<p><b>Not directly.</b> The Fourth Basis for sharing revenue among counties, approved for 2025/26 to 2029/30, gives each county its baseline allocation, shares KSh 2 billion equally among 11 identified counties, and splits any additional money by population (45%), an equal share (35%), poverty (12%) and geographical size (8%). Gross County Product is not one of the measures.</p>
+<p>The Equalisation Fund is different. Article 204 of the 2010 Constitution sets aside 0.5% of national revenue each year to bring water, roads, health facilities and electricity in marginalised areas up to the level the rest of Kenya enjoys. The Constitution names no counties: it leaves the criteria to the Commission on Revenue Allocation. CRA's first policy (2013) named 14 marginalised counties, 11 of them in this hub: Turkana, Mandera, Wajir, Marsabit, Samburu, West Pokot, Tana River, Narok, Garissa, Isiolo and Lamu, plus Kwale, Kilifi and Taita Taveta.</p><p>The second policy (2018) changed the unit from counties to sub-locations, spreading the fund across 1,424 areas in 34 counties, mainly by access to education, water, sanitation and electricity. Critics argue this thins out money meant for the historically marginalised counties. CRA began reviewing the policy in mid-2026, and Article 204 lapses 20 years after the Constitution took effect, around August 2030, unless Parliament extends it.</p>
+<p>So low output helps a pastoralist county only indirectly, through the poverty and land-area weights. One case to make in the policy review: reward investment in growth enablers such as rangeland health, water, market access and mobility routes, not only measures of deprivation.</p>
+<p class="mute">Sources: <a href="https://mzalendo.com/legislative-trends/motions/1313/" target="_blank" rel="noopener">Senate motion on the Fourth Basis</a> · <a href="https://www.the-star.co.ke/news/2019-08-24-cra-changes-criteria-for-marginalised-areas" target="_blank" rel="noopener">The Star on the second marginalisation policy</a> · <a href="https://the-star.co.ke/news/2026-07-01-cra-review-sparks-row-over-allocation-of-equalisation-fund" target="_blank" rel="noopener">The Star on the 2026 review</a></p>
+</div>
+</section>
+
+<section id="v-case" hidden>
+<h2>Why invest in the drylands</h2>
+<p class="lead" style="max-width:70ch"><b>Kenya’s farmland cannot feed 84 million people alone. The drylands, 89% of the country, can be Kenya’s protein basket and its next growth frontier, if we invest in them on pastoral terms.</b></p>
+<h3 class="sec">The national case</h3>
+<div class="scroll"><table class="log stack"><thead><tr><th>Fact</th><th>What the evidence says</th><th>Source</th></tr></thead><tbody><tr><td><b>Farmland is running out.</b></td><td>Only about 20% of Kenya is high or medium potential for crops, and 98% of farm holdings are small, averaging 1.2 ha.</td><td><a href="https://kippra.or.ke/?p=14369" target="_blank" rel="noopener">KIPPRA</a></td></tr><tr><td><b>It is being divided up.</b></td><td>A National Land Commission study found subdivision through inheritance mostly in the most productive farming areas, and real estate has grown faster than agriculture.</td><td><a href="https://www.theeastafrican.co.ke/tea/science-health/shrinking-kenyan-farm-acreage-risks-food-security-3750876" target="_blank" rel="noopener">The EastAfrican on NLC study</a>; <a href="https://kippra.or.ke/implications-of-agricultural-land-subdivision-in-kenya/" target="_blank" rel="noopener">KIPPRA</a></td></tr><tr><td><b>More people to feed.</b></td><td>About 58.6 million Kenyans in 2026, projected to reach about 83.6 million by 2050.</td><td><a href="https://www.populationpyramid.net/kenya/2050/" target="_blank" rel="noopener">UN World Population Prospects 2024</a></td></tr><tr><td><b>The drylands are most of Kenya.</b></td><td>The ASALs cover 89% of the country, hold 38% of its people and are its main meat-producing areas.</td><td><a href="https://www.lse.ac.uk/granthaminstitute/wp-content/uploads/2020/10/Bedelian-et-al-2019.pdf" target="_blank" rel="noopener">Bedelian et al. 2019, LSE Grantham</a></td></tr><tr><td><b>Pastoralism produces most of Kenya’s livestock.</b></td><td>The ASALs host over 60% of Kenya’s livestock, and pastoralism accounts for over 70% of livestock production.</td><td><a href="https://www.standardmedia.co.ke/article/2001272989/economy-can-gain-massively-from-the-livestock-sub-sector" target="_blank" rel="noopener">The Standard</a>; <a href="https://core.ac.uk/download/237679573.pdf" target="_blank" rel="noopener">ASAL pasture policy brief</a></td></tr><tr><td><b>Demand is outrunning supply, and value is left on the table.</b></td><td>Kenya was already short of meat by 2014. Livestock is about 40% of agricultural GDP, but most of it never reaches a formal market.</td><td><a href="https://www.standardmedia.co.ke/article/2001272989/economy-can-gain-massively-from-the-livestock-sub-sector" target="_blank" rel="noopener">The Standard</a>; <a href="https://saficagriatlas.strathmore.edu/livestock" target="_blank" rel="noopener">Strathmore Agri Atlas</a></td></tr></tbody></table></div>
+<h3 class="sec">What is in it for each of us</h3>
+<div class="scroll"><table class="log stack"><thead><tr><th>Who</th><th>What they care about</th><th>The case</th><th>The ask</th></tr></thead><tbody><tr><td><b>National government and Treasury</b></td><td>Food security, growth, the import bill, jobs</td><td>The drylands are where output can grow without competing for shrinking farmland, and the investment pays back.</td><td>Match county investment; pay the Equalisation Fund arrears; treat the pastoral economy as a growth sector.</td></tr><tr><td><b>County governments</b></td><td>Revenue, jobs, visible results</td><td>Counties own the mainstay economy. Their 15% unlocks national and partner money.</td><td>At least 15% of the budget for pastoralism-friendly investment.</td></tr><tr><td><b>Development partners and climate funds</b></td><td>Results, resilience, value for money, adaptation</td><td>Proven high returns from early off-take and herder-led rangeland management, and a clear plan for where the money goes.</td><td>Close the external gap, through county and local systems.</td></tr><tr><td><b>Private sector and investors</b></td><td>Markets, supply, returns</td><td>A growing national market for meat and milk, short of supply, with most value still informal.</td><td>Invest in processing, cold chain, markets and feed, linked to herders.</td></tr><tr><td><b>Youth</b></td><td>Jobs and income</td><td>Pastoralism is a value chain: trading, processing, animal health, transport, digital markets and finance, not only herding.</td><td>Training, start-up finance and market access in pastoral value chains.</td></tr><tr><td><b>Communities</b></td><td>Land, mobility, fair prices, safety in drought</td><td>Their economy is a national asset; protect it and pay fairly for it.</td><td>Secure communal land and mobility; a voice in county budgets.</td></tr><tr><td><b>Every Kenyan</b></td><td>Food prices, health, the future</td><td>Affordable protein and a healthier Kenya depend on productive drylands.</td><td>Back investment in the drylands as a national priority.</td></tr></tbody></table></div>
+<div class="answer"><p><b>On pastoral terms.</b> “Food basket” must not mean turning rangelands into irrigated crop schemes; large schemes such as the Tana Delta Irrigation Project fell short and cost herders land. What works is investing in mobility, communal land, herder-managed rangelands, animal health and livestock markets. That is also where young people’s jobs are: along the livestock value chain.</p>
+<p><a href="#map">See what it takes, county by county, on the green map</a> · <a href="#map">Read the evidence and answers to common objections</a></p></div>
+</section>
+
+<section id="v-map" hidden>
+<h2>Turning green: the 15 counties on the map</h2>
+<p class="sub">An AHN scenario, not a forecast. Slide the county, national and external funding and the investment mix to see when each county turns green. AHN’s benchmark is that each county puts <b>at least 15% of its budget</b> into pastoralism-friendly investment. That is rarely happening today, because county plans and national priorities have followed development blueprints made for crop-farming counties. Counties cannot close the gap left by decades of marginalisation and rising climate risk on their own. The map shows how much green investment it takes, from all sources together, for each county to turn green, who pays, and what the investment earns back.</p>
+<div class="bar seg"><button class="btn" id="mgreen" aria-pressed="true">Green scenario</button><button class="btn" id="mfund" aria-pressed="false">Published funding</button></div>
+<div class="mctl" id="mgctl">
+<label><span class="mute">Counties: share of own budget in pastoralism-friendly investment</span><output id="mbv">15%</output><input type="range" id="mbud" min="0" max="30" step="1" value="15" aria-label="County budget share, percent"></label>
+<label><span class="mute">National government: matching share</span><output id="mnv">15%</output><input type="range" id="mnat" min="0" max="30" step="1" value="15" aria-label="National government share, percent"></label>
+<label><span class="mute">External finance a year, 15 counties (partners, climate funds, private sector, disaster risk finance)</span><output id="mev">$1.8bn</output><input type="range" id="mextr" min="0" max="4000" step="50" value="1800" aria-label="External finance a year, US$ million"></label>
+<label><span class="mute">Years</span><output id="myv">15 years</output><input type="range" id="myears" min="5" max="30" step="1" value="15" aria-label="Years"></label>
+<div class="presets"><span class="mute">County and national at:</span><button class="btn" data-mp="5">5%</button><button class="btn" data-mp="10">10%</button><button class="btn" data-mp="15">15%</button><button class="btn" data-mp="20">20%</button><button class="btn" data-mp="25">25%</button><span class="mute">External:</span><button class="btn" data-me="0">none</button><button class="btn" data-me="1000">$1bn</button><button class="btn" data-me="2000">$2bn</button><button class="btn" id="mplay">Play years</button></div>
+</div>
+<p id="mlead"></p>
+<div class="mleg" id="mlegend"></div>
+<div id="mmixw"><h3 class="sec">Pastoralism-friendly investment mix</h3><p class="sub">Slide to change how the pastoral-economy money is split. The basic services catch-up is set per person under "How the scenario works".</p><div id="mmix" class="mixgrid"></div></div>
+<div class="mapwrap"><svg id="kmap" viewBox="0 0 486 618" role="img" aria-label="Map of Kenya's counties, with the 15 pastoralist counties coloured"></svg><div id="mapside" aria-live="polite"></div></div>
+<div id="mgsect"><h3 class="sec">Who pays</h3>
+<div class="scroll"><table class="log stack" id="mstack"></table></div>
+<h3 class="sec">What the money pays for</h3>
+<p class="sub">A. The nine sectors that make pastoralism, the backbone of these economies, more productive and drought-proof. B. The basic services these counties missed out on. Tap a county to add its own column. Shares and amounts are drafts for AHN's panels to agree; change them under "How the scenario works".</p>
+<div class="scroll"><table class="log stack" id="msect"></table></div>
+<h3 class="sec">County by county</h3></div>
+<div class="scroll"><table class="log stack" id="mtable"></table></div>
+<section class="evid" aria-labelledby="evh">
+<h3 class="sec" id="evh">The criteria, and the evidence behind them</h3>
+<p class="sub">A county is green when its pastoral economy grows and holds up through drought. These are the nine sectors the scenario invests in, what each pays for, and how we will know it is working.</p>
+<div class="scroll"><table class="log stack"><thead><tr><th>Sector</th><th>What it pays for</th><th>How we know it is working</th></tr></thead><tbody><tr><td>Mobility and access to grazing</td><td>Migration corridors, dry-season reserves, cross-border grazing agreements</td><td>Routes and reserves mapped, protected in county plans and open</td></tr><tr><td>Drought risk management and climate adaptation</td><td>Early warning, early off-take, fodder banks, livestock insurance, restocking</td><td>Livestock deaths per drought falling; herds recover faster</td></tr><tr><td>Rangelands managed by herders</td><td>Restoration, reseeding, Prosopis control, grazing plans run by customary institutions</td><td>Pasture and vegetation condition against a baseline</td></tr><tr><td>Livestock, milk and meat markets</td><td>Market access, fair prices, cold chain, processing, feedlots and finishing linked to herders</td><td>Share of livestock value kept in the county; herders’ income</td></tr><tr><td>Secure communal land</td><td>Community land registration that keeps grazing rights; recognised customary rules</td><td>Share of communal land registered with grazing rights intact</td></tr><tr><td>Water planned for mobility</td><td>Water points spread along routes, not clustered in towns</td><td>Water within reach along routes in the dry season</td></tr><tr><td>Animal health</td><td>Vaccination, community animal health workers, disease surveillance</td><td>Herd losses to disease falling</td></tr><tr><td>Pastoral-led finance and decisions</td><td>County climate funds run through ward committees; women and youth in value chains</td><td>Share of funds decided and spent locally; women’s and youth’s share</td></tr><tr><td>Low-carbon rangelands</td><td>Soil carbon with community consent and fair benefit sharing, Prosopis biochar, solar pumping and milk cooling</td><td>Community-approved carbon income and clean energy at water points</td></tr></tbody></table></div>
+<h4 class="sec">What the evidence says</h4>
+<div class="scroll"><table class="log stack"><thead><tr><th>Sector</th><th>Finding</th><th>Source</th></tr></thead><tbody><tr><td>Mobility and access to grazing</td><td>Mobility underpins food security, nutrition and health in pastoral households in Marsabit and Isiolo.</td><td><a href="https://fic.tufts.edu/publication-item/mobility-matters/" target="_blank" rel="noopener">Tufts Feinstein Center, Mobility Matters (2023)</a></td></tr><tr><td>Drought risk management and climate adaptation</td><td>Early commercial off-take in southern Ethiopia returned about 41 times its aid cost; destocking cost 137 times less than food aid.</td><td><a href="https://alnap.org/help-library/resources/impact-and-benefit-cost-estimation-of-a-commercial-destocking-relief-intervention-in/" target="_blank" rel="noopener">Abebe et al. 2008; LEGS 2018</a></td></tr><tr><td>Drought risk management and climate adaptation</td><td>Kenya’s satellite-based livestock insurance (KLIP) pays out early so herders can buy water, feed and vet care to keep animals alive.</td><td><a href="https://www.ilri.org/news/kenya-government-declares-pay-out-ksh87-million-cushion-6000-pastoralists-effects-drought" target="_blank" rel="noopener">ILRI on KLIP</a></td></tr><tr><td>Rangelands managed by herders</td><td>A rapid assessment found returns on rangeland management by its users of about 24 to 1 in normal years and 90 to 1 in drought.</td><td><a href="https://kefri.org/assets/publications/tech/Landscape%20Restoration%20in%20Kenya.pdf" target="_blank" rel="noopener">KEFRI, Landscape Restoration in Kenya</a></td></tr><tr><td>Livestock, milk and meat markets</td><td>Women-led camel milk networks from Isiolo to Nairobi deliver high reliability despite volatility.</td><td><a href="https://link.springer.com/content/pdf/10.1186/s13570-022-00265-1.pdf" target="_blank" rel="noopener">Nori 2023, Pastoralism journal</a></td></tr><tr><td>Secure communal land</td><td>By May 2023 only 46 of 315 undissolved group ranches had become registered community land.</td><td><a href="https://namati.org/wp-content/uploads/2023/10/Monitoring-the-Transition-of-Group-Ranches-to-Community-Land-in-Kenya_09102023.pdf" target="_blank" rel="noopener">NLC and Namati 2023</a></td></tr><tr><td>Low-carbon rangelands</td><td>Kenya’s 2023 climate law amendment regulates carbon projects, including on community land.</td><td><a href="https://www.ecolex.org/details/legislation/the-climate-change-amendment-act-no-9-of-2023-lex-faoc220092/" target="_blank" rel="noopener">Climate Change (Amendment) Act 2023</a></td></tr></tbody></table></div>
+<h4 class="sec">Answers to common objections</h4>
+<ul class="dlist"><li><b>"Pastoralism is a backward, low-value way of life."</b> Valuation studies find official statistics undercount pastoralism’s market and non-market value, and Kenya’s own ASAL Policy (2012) and Range Management and Pastoralism Strategy 2021–2031 commit to supporting it. <span class="mute">Sources: <a href="https://link.springer.com/doi/10.1186/s13570-019-0144-x" target="_blank" rel="noopener">Nyariki and Amwata 2019</a>; <a href="https://iucn.org/sites/default/files/import/downloads/kenya_tev.pdf" target="_blank" rel="noopener">IUCN 2007</a>; <a href="https://repository.kippra.or.ke/handle/123456789/1020" target="_blank" rel="noopener">ASAL Policy</a>; <a href="https://leap.unep.org/en/countries/ke/national-legislation/range-management-and-pastoralism-strategy-2021-2031" target="_blank" rel="noopener">Strategy 2021–2031</a>.</span></li><li><b>"Herds and mobility cause overgrazing."</b> Research traces the overgrazing story to colonial-era narratives that still shape how degradation is read, and rangeland management by herders shows high returns. <span class="mute">Sources: <a href="https://doi.org/10.3389/past.2025.15617" target="_blank" rel="noopener">Little 2025</a>; <a href="https://kefri.org/assets/publications/tech/Landscape%20Restoration%20in%20Kenya.pdf" target="_blank" rel="noopener">KEFRI</a>.</span></li><li><b>"Settling herders and big irrigation schemes are the way forward."</b> Large schemes such as the Tana Delta Irrigation Project fell short, while mobility supports nutrition and resilience. <span class="mute">Sources: <a href="https://shs.hal.science/halshs-01764002" target="_blank" rel="noopener">Lebrun 2009</a>; <a href="https://fic.tufts.edu/publication-item/mobility-matters/" target="_blank" rel="noopener">Tufts 2023</a>.</span></li><li><b>"Drought relief is enough; investing ahead is too costly."</b> Early action is far cheaper than late relief, and climate disasters already cost Kenya about 2 to 2.8% of GDP a year. <span class="mute">Sources: <a href="https://www.livestock-emergency.net/wp-content/uploads/2017/10/LEGS-Briefing-Paper-Economic-Impacts-of-Early-Drought-Response.pdf" target="_blank" rel="noopener">LEGS 2018</a>; <a href="https://www.climatepolicyinitiative.org/publication/the-landscape-of-climate-finance-in-kenya/" target="_blank" rel="noopener">Climate Policy Initiative</a>.</span></li><li><b>"Pastoral markets are informal and unreliable."</b> Camel milk trade run largely by women moves milk reliably from the rangelands to city markets. <span class="mute">Sources: <a href="https://link.springer.com/content/pdf/10.1186/s13570-022-00265-1.pdf" target="_blank" rel="noopener">Nori 2023</a>.</span></li><li><b>"Money sent to these counties is wasted."</b> Much of the money owed has never arrived: the Controller of Budget reports at least KSh 48bn still owed to the Equalisation Fund. The hub follows each shilling from allocated to audited, and an audit query is not a finding of wrongdoing. <span class="mute">Sources: <a href="#economy">Equalisation Fund tracker</a>; <a href="#partners">Partners and investment</a>.</span></li></ul>
+<p class="mute">Feedlots and fodder: feedlots work best as part of the market chain, buying animals early in a drought and finishing them for sale, owned by or linked to herders. They should not take grazing land or replace mobility. Fodder bought ahead of drought keeps the core breeding herd alive.</p>
+</section>
+<details class="more"><summary>How the scenario works, and its assumptions</summary>
+<p>"Green" here means a county’s pastoral economy grows and holds up through drought: livestock value up, drought losses down, mobility kept and rangelands healthy. The scenario asks how much investment in the nine sectors that takes. Each county moves up four steps: Starting, Building (a third of the way), Green-ready (two thirds) and Green.</p>
+<p><b>What is needed</b> is set per person, then raised each year for rising climate risk. A, the pastoral economy: $1,200 per person by default, which is Kenya's climate plan cost of about $62 billion for 2020 to 2030 shared across roughly 50 million Kenyans. B, catching up on basic services: a draft $1,000 per person for the panels to agree. In the north and north-east, World Bank figures put electricity access at 7%, safe water at 45% and improved sanitation at 36%. Population comes from the county figures in "County economies".</p>
+<p><b>What it earns back</b>: each dollar invested in the pastoral economy is assumed to add about 20 cents a year to county output (editable below). That is cautious next to the evidence above: returns of 24 to 1 for herder-run rangeland management and 41 to 1 for early off-take. Basic services are not counted as earning anything, though they do.</p>
+<p><b>Who pays</b>: 1, each county’s budget share, based on its 2025/26 equitable share (KSh 117.2 billion for the 15 counties, National Treasury, June 2025); 2, the 2025/26 Equalisation Fund amounts already in the hub (not yet found for Isiolo, Tana River, Lamu, Elgeyo Marakwet and Laikipia); 2, the national government, development partners, climate funds, the private sector and disaster risk finance cover the rest. The scenario does not yet count returns from the investment itself, so it is cautious.</p>
+<div class="exgrid"><label>B. Basic services catch-up per person (US$) <input id="mback" type="number" min="0" max="20000" step="100" value="1000" style="max-width:8em"></label><label>Rise in need from climate risk (% a year) <input id="mclim" type="number" min="0" max="10" step="0.5" value="2" style="max-width:6em"></label><label>Yearly output added per $1 invested in the pastoral economy (cents) <input id="mret" type="number" min="0" max="100" step="1" value="20" style="max-width:6em"></label><label>Exchange rate (KSh per US$, approximate) <input id="mfx" type="number" min="50" max="300" step="1" value="129" style="max-width:6em"></label></div>
+<label>A. Pastoral economy per person (US$) <input id="mneed" type="number" min="100" max="20000" step="100" value="1200" style="max-width:9em"></label>
+<p class="mute">Criteria and assumptions are a draft for AHN's Research and Funding panels to agree. Boundaries: IEBC county boundaries, via mikelmaron/kenya-election-data. Climate plan cost: Climate Policy Initiative, Landscape of Climate Finance in Kenya.</p>
+</details>
+</section>
+
+<section id="v-partners" hidden>
+<h2>Partners and investment</h2>
+<p class="sub">Who is investing in each county, in which of the four pillars (humanitarian, development, peace and climate), and how much of it is delivered by local actors. Everything here comes from public sources and is approved by the Funding panel.</p>
+<h3 class="sec">Balance across the four pillars</h3>
+<p class="sub">Approved investments per county and pillar. "Delivered locally" is the share delivered by county governments or local and national NGOs.</p>
+<div class="scroll"><table class="log stack" id="pgrid"></table></div>
+<h3 class="sec">Follow the money</h3>
+<p class="sub">For each county, the latest approved record at each step: money allocated, released by the Controller of Budget, spent, and audited by the Auditor-General. Older records stay in the register as history; nothing is overwritten.</p>
+<div class="scroll"><table class="log stack" id="fmoney"></table></div>
+<h3 class="sec">Investments</h3>
+<div class="filters">
+<label><span class="mute">County</span><select id="pc"></select></label>
+<label><span class="mute">Pillar</span><select id="pp"></select></label>
+<label><span class="mute">Delivered by</span><select id="pch"></select></label>
+</div>
+<p class="mute" id="pcount"></p>
+<div id="plistinv"></div>
+<h3 class="sec">Where the data comes from, and how names are shown</h3>
+<ul class="dlist">
+<li>Humanitarian funding: OCHA's Financial Tracking Service. Development and climate funding: IATI, and the World Bank, African Development Bank, IFAD, Green Climate Fund and Adaptation Fund portals.</li>
+<li>Public money: National Treasury, the Commission on Revenue Allocation, Parliament, the Controller of Budget and the Office of the Auditor-General.</li>
+<li>An amount is shown only where it is published. When a project covers several counties without splitting the money, it is marked "covers this county" with no county amount.</li>
+<li>An organisation is named only where a public document names it, with the link. Otherwise it is shown by type, such as "a local or national NGO", until it gives consent. The hub is never the first to name anyone. A reviewer can hide a name for safety, especially for local peace actors.</li>
+<li>Audit entries copy the audit opinion and figures from the report. They are audit queries, not findings of wrongdoing; check for the county's response. Entries that interpret findings need two reviewers, and entries naming individual officers also need the administrator's safety check.</li>
+</ul>
+</section>
+
+<section id="v-add" hidden>
+<h2>Suggest a study, case or project</h2>
+<p class="sub" id="addSub">Your suggestion goes to the administrator, who sends it to the right reviewer panel. It enters the register once reviewers approve it.</p>
+<div id="addform"></div>
+<div class="acts" id="addacts"></div>
+</section>
+
+<section id="v-inbox" hidden>
+<h2>Suggestions inbox</h2>
+<p class="sub">Suggestions sent in through the form. The administrator sends each one to the reviewer panel or declines it. Comments left on the page appear in the comments panel; to review one formally, copy it into the Suggest form.</p>
+<div class="bar"><label><span class="mute">Show</span><select id="ishow"><option value="new">New</option><option value="in review">Sent to reviewers</option><option value="declined">Declined</option><option value="approved">Approved</option><option value="">All</option></select></label></div>
+<div id="ilist"></div>
+</section>
+
+<section id="v-panel" hidden>
+<h2>Reviewer panel</h2>
+<p class="sub">Three panels review items: Research, Policy and legal, and Funding. A reviewer can sit on more than one. Until a panel has three members, any reviewer on any panel can approve its items.</p>
+<div id="plist" class="plist"></div>
+<div id="padmin"></div>
+</section>
+
+<section id="v-how" hidden>
+<h2>How it works</h2>
+<p class="sub">Search and suggestions bring items in, the right panel approves them, and only approved records count.</p>
+<ol class="steps">
+<li><b>Search, plus a 30-year backfill</b>Every Monday morning (Nairobi time), Claude searches court decisions, carbon registries, gazettes, county funds, university repositories, journals and the news for the 15 counties. A daily backfill works back from 2023 to 1996, three years at a time.</li>
+<li><b>Anyone can add knowledge</b>Anyone with the link can comment on any record or item. People invited as contributors can also send suggestions and proposed edits through a form.</li>
+<li><b>The administrator routes it</b>Each item goes to one of three panels: Research (studies), Policy and legal (cases, laws, land) or Funding (investments, county funds, audits). The administrator can assign items to particular reviewers.</li>
+<li><b>Approval by tier</b>Tier 1, such as a published law or figures copied from an official report: shown in the register straight away, marked "not yet checked", and confirmed by one reviewer. Tier 2, such as interpretations, bias or friendly labels and edits: two of three reviewers. Tier 3, such as anything naming individuals: two of three plus the administrator's safety check. Any reviewer can raise a tier; only the administrator can lower one.</li>
+<li><b>Public sources and names</b>Funding data comes only from public sources. An organisation is named only where a public document names it, or with its consent.</li>
+</ol>
+<h3 class="sec" style="margin-top:0">Recent searches</h3>
+<div class="scroll"><table class="log stack" id="runlog"></table></div>
+</section>
+</div></main>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script>window.HUB_PUBLIC={"snapshot": "2026-11-22", "items": [{"id": "bf-1997-mitchell-rendille-women", "kind": "research", "title": "Pastoral Women and Sedentism: Milk Marketing by Ariaal Rendille Females of Northern Kenya", "date": "1997", "status": "Completed", "level": "Masters thesis", "origin": "Global university (Victoria, Canada)", "counties": ["Marsabit"], "themes": ["Gender"], "summary": "Mitchell, J.D. What changes for pastoral women as households settle and join the market economy.", "sources": [{"name": "University of Victoria", "url": "https://dspace.library.uvic.ca/bitstreams/a32e6c4b-2b0c-48da-b55a-8dcbebba88c8/download"}]}, {"id": "bf-2021-siedenburg-perils-kenyan-pastoralists", "kind": "research", "title": "Perils facing Kenyan pastoralists, livelihood innovations and wider impacts: learning from project experience", "date": "2021-08-21", "status": "Published", "level": "Journal article", "origin": "Global university (East Anglia)", "counties": ["Mandera", "Marsabit", "Turkana", "Wajir"], "themes": ["Climate adaptation and mitigation", "Pastoral green economy"], "summary": "Siedenburg, J. A cost-benefit review of seven charity-run livelihood projects under the UK Arid Lands Support Programme, judging which innovations offer most value.", "sources": [{"name": "UEA eprints (Development Studies Research)", "url": "https://ueaeprints.uea.ac.uk/id/eprint/81241/1/Published_Version.pdf"}]}, {"id": "bf-2021-van-anda-samburu-youth-aspirations", "kind": "research", "title": "Changes in Livelihood Aspirations among Formally Educated Pastoral Youth in Northern Kenya", "date": "2021", "status": "Published", "level": "Journal article", "origin": "Global university (Colorado State)", "counties": ["Samburu"], "themes": ["Other"], "summary": "Van Anda et al. A game-based survey of educated Samburu youth found most would cut herds and diversify income, with implications for future rangeland pressure.", "sources": [{"name": "Children, Youth and Environments", "url": "https://journals.uc.edu/index.php/cye/article/view/4837"}]}, {"id": "bf-2022-becker-cologne-east-pokot-women", "kind": "research", "title": "\"When men lose their animals, women gain power\": Women and Change in East Pokot, Kenya", "date": "2022-10", "status": "Published", "level": "PhD thesis", "origin": "Global university (Cologne)", "counties": ["Baringo"], "themes": ["Gender"], "summary": "Becker, A.K. An ethnography from Chemolingot and Kadingding showing women as the main agents of change as drought-driven sedentarisation reshapes marriage, work and stratification.", "sources": [{"name": "University of Cologne (KUPS)", "url": "https://kups.ub.uni-koeln.de/65434/1/Dissertation_AnjaBecker_WomenChange-EP_03023023_published_usbkoeln.pdf"}]}, {"id": "bf-2022-irungu-ku-mandera-drr", "kind": "research", "title": "Disaster Risk Interventions for Enhancing Resilience among Pastoral Communities of Mandera County, Kenya", "date": "2022-11", "status": "Published", "level": "Masters thesis", "origin": "Kenyan university (Kenyatta)", "counties": ["Mandera"], "themes": ["Climate adaptation and mitigation", "Water"], "summary": "Irungu, F.K. Uses 1989-2019 climate data and a survey of 157 people to assess drought impacts and disaster risk reduction capacity, and recommends stronger early warning.", "sources": [{"name": "Kenyatta University repository", "url": "https://ir-library.ku.ac.ke/items/32ac12e0-8492-4c06-aa92-a5d16140a686/full"}]}, {"id": "bf-2022-nkonge-ku-ngaremara-isiolo", "kind": "research", "title": "Adaptive Capacity of Pastoralists to Climate Variability in Ngaremara, Isiolo County, Kenya", "date": "2022", "status": "Published", "level": "Masters thesis", "origin": "Kenyan university (Kenyatta)", "counties": ["Isiolo"], "themes": ["Climate adaptation and mitigation"], "summary": "Nkonge, L.G. Finds that low socio-economic development and near-total dependence on herding leave Ngaremara pastoralists' traditional coping methods inadequate.", "sources": [{"name": "Kenyatta University repository", "url": "https://ir-library.ku.ac.ke/handle/123456789/24147"}]}, {"id": "bf-2023-ali-ku-mandera-insecurity", "kind": "research", "title": "Effects of insecurity on socio-economic activities of pastoralist communities in Mandera County, Kenya", "date": "2023-09", "status": "Completed", "level": "MA thesis", "origin": "Kenyan university (Kenyatta)", "counties": ["Mandera"], "themes": ["Conflict and peacebuilding"], "summary": "Ali, A.M. How insecurity affects pastoralist livelihoods in Mandera. One of the few studies found on Mandera.", "sources": [{"name": "Kenyatta University repository", "url": "https://ir-library.ku.ac.ke/bitstreams/1b951d5b-8719-4462-8b7e-4400b83a170b/download"}]}, {"id": "bf-2023-kim-turkana-oil-conflict", "kind": "research", "title": "Oil extraction and the changing dynamics of pastoral conflicts: a conjoint experiment in Turkana, Kenya", "date": "2023-06", "status": "Published", "level": "Journal article", "origin": "Global university (Appalachian State)", "counties": ["Turkana"], "themes": ["Investment", "Conflict and peacebuilding"], "summary": "Kim, H.-S. Survey experiment with 801 Turkana residents on how oil may change pastoral conflict.", "sources": [{"name": "Cambridge Core", "url": "https://www.cambridge.org/core/product/F92F40D909300E989EFD8202F3C58C3C/core-reader"}]}, {"id": "bf-2023-ku-phd-kerio-valley-food-insecurity", "kind": "research", "title": "Effects of Environmental Variability and Resource Conflicts on Food Insecurity in Kerio Valley Basin, Kenya", "date": "2023-05", "status": "Published", "level": "PhD thesis", "origin": "Kenyan university (Kenyatta)", "counties": ["Baringo", "Elgeyo Marakwet", "West Pokot"], "themes": ["Conflict and peacebuilding", "Climate adaptation and mitigation", "Community land and disputes"], "summary": "A study of 387 households in the tri-county Northern Kerio Valley links about 48% of food insecurity to drought combined with resource-based ethnic conflict on communal clan land.", "sources": [{"name": "Kenyatta University repository", "url": "https://ir-library.ku.ac.ke/items/13c4bc26-9c92-4aff-9066-20e60221c456"}]}, {"id": "bf-2023-mccrone-election-violence-arid-north", "kind": "research", "title": "'I have opened the land for you': pastoralist politics and election-related violence in Kenya's arid north", "date": "2023-08-19", "status": "Published", "level": "Journal article", "origin": "Global university (LSE)", "counties": ["Samburu", "Isiolo", "Laikipia"], "themes": ["Conflict and peacebuilding", "Devolution and PFM"], "summary": "McCrone, F. An ethnography of the 2017 and 2022 elections showing local elites using armed herd incursions onto contested land for electoral gain, and documenting 'vote shipping'.", "sources": [{"name": "LSE Research Online", "url": "https://researchonline.lse.ac.uk/id/eprint/120202"}, {"name": "Journal of Eastern African Studies (DOI)", "url": "https://doi.org/10.1080/17531055.2023.2245596"}]}, {"id": "bf-2023-mikula-ku-kajiado-pasture-drought", "kind": "research", "title": "Rangeland Pasture Management Strategies during Drought among Pastoralists in Kajiado County, Kenya", "date": "2023-09", "status": "Published", "level": "Masters thesis", "origin": "Kenyan university (Kenyatta)", "counties": ["Kajiado"], "themes": ["Climate adaptation and mitigation", "Natural resource governance"], "summary": "Mikula, R.A. A survey of 385 households found migration and herd-pasture matching were the main drought strategies, with little feed conservation.", "sources": [{"name": "Kenyatta University repository", "url": "https://ir-library.ku.ac.ke/handle/123456789/27611"}]}, {"id": "bf-2012-sessional-paper-8-asal-policy", "kind": "law", "title": "Sessional Paper No. 8 of 2012: National Policy for the Sustainable Development of Northern Kenya and other Arid Lands (ASAL Policy)", "date": "2012", "status": "Approved by Parliament, December 2012", "level": "National policy", "origin": "Government of Kenya", "counties": ["National"], "themes": ["ASAL-friendly agenda", "Natural resource governance"], "summary": "Aims to close the development gap with the rest of Kenya and to protect the mobility and institutions that productive pastoralism depends on. Deliberately reverses the bias of Sessional Paper No. 10 of 1965.", "sources": [{"name": "KIPPRA repository", "url": "https://repository.kippra.or.ke/handle/123456789/1020"}]}, {"id": "bf-2012-vision-2030-northern-kenya", "kind": "law", "title": "Vision 2030 Development Strategy for Northern Kenya and other Arid Lands", "date": "2012-03", "status": "Final, March 2012", "level": "National strategy", "origin": "Government of Kenya", "counties": ["National"], "themes": ["ASAL-friendly agenda", "Investment"], "summary": "Calls for strategies that reinforce mobile pastoralism, alongside viable non-pastoral livelihoods for growing towns.", "sources": [{"name": "FAOLEX", "url": "https://faolex.fao.org/docs/pdf/ken179242.pdf"}]}, {"id": "bf-2021-range-management-pastoralism-strategy", "kind": "law", "title": "Range Management and Pastoralism Strategy 2021-2031", "date": "2021", "status": "Adopted", "level": "National", "origin": "Government of Kenya (Ministry of Agriculture, Livestock, Fisheries and Cooperatives)", "counties": ["National"], "themes": ["ASAL-friendly agenda", "Natural resource governance", "Climate adaptation and mitigation"], "summary": "A ten-year national strategy to improve rangeland health, revitalise pastoral production, build in climate action, expand rangeland markets and strengthen national, county and community governance.", "sources": [{"name": "UNEP LEAP / FAOLEX", "url": "https://leap.unep.org/en/countries/ke/national-legislation/range-management-and-pastoralism-strategy-2021-2031"}, {"name": "Strategy PDF (kilimo.go.ke)", "url": "https://kilimo.go.ke/wp-content/uploads/2024/08/RANGE-MANAGEMENT-AND-PASTORALISM-STRATTEGY.pdf"}]}, {"id": "bf-2023-climate-change-amendment-act-carbon", "kind": "law", "title": "Climate Change (Amendment) Act, No. 9 of 2023", "date": "2023-09-15", "status": "In force", "level": "National", "origin": "Government of Kenya", "counties": ["National"], "themes": ["Carbon markets", "Natural resource governance", "Climate adaptation and mitigation"], "summary": "Amends the Climate Change Act 2016 by adding a new part that regulates carbon markets, carbon projects and trading under the Paris Agreement. It laid the ground for the 2024 carbon markets regulations.", "sources": [{"name": "ECOLEX / FAOLEX", "url": "https://www.ecolex.org/details/legislation/the-climate-change-amendment-act-no-9-of-2023-lex-faoc220092/"}, {"name": "Act PDF (Oraro)", "url": "https://www.oraro.co.ke/wp-content/uploads/2023/09/The-Climate-Change-Amendment-Act-2023.pdf"}]}, {"id": "bf-2023-nccap-iii-2023-2027", "kind": "law", "title": "National Climate Change Action Plan (NCCAP III) 2023-2027", "date": "2023", "status": "Adopted", "level": "National", "origin": "Government of Kenya (Ministry of Environment, Climate Change and Forestry)", "counties": ["National"], "themes": ["Climate adaptation and mitigation"], "summary": "Kenya's third climate action plan sets eight priorities, including disaster risk management and food security. Its only explicit pastoral measure is on farmer and pastoralist resilience.", "sources": [{"name": "UNEP LEAP / FAOLEX", "url": "https://leap.unep.org/en/countries/ke/national-legislation/national-climate-change-action-plan-nccap-iii-2023-2027-towards"}]}, {"id": "ef-article-204-sunset-2030", "kind": "law", "title": "Article 204 Equalisation Fund lapses around August 2030 unless Parliament extends it", "date": "2010", "status": "In force until about August 2030", "level": "Constitution", "origin": "Constitution of Kenya, 2010", "counties": ["National"], "themes": ["Devolution and PFM"], "summary": "Article 204 lapses twenty years after the Constitution took effect. Parliament may pass legislation suspending the lapse for a further fixed period.", "sources": [{"name": "Kenya Law Reform Commission: Article 204", "url": "https://klrc.go.ke/index.php/constitution-of-kenya/147-chapter-twelve-public-finance/part-1-principles-and-framework-of-public-finance/373-204-equalisation-fund"}]}, {"id": "law-fourth-basis-revenue-sharing", "kind": "law", "title": "Fourth Basis for sharing revenue among counties, 2025/26 to 2029/30", "date": "2025-06", "status": "Approved June 2025", "level": "Parliamentary resolution", "origin": "Parliament of Kenya, on CRA's recommendation", "counties": ["National"], "themes": ["Devolution and PFM"], "summary": "Baseline allocation plus KSh 2bn shared among 11 identified counties; additional money split by population 45%, equal share 35%, poverty 12% and geographical size 8%. County output (GCP) is not a parameter.", "sources": [{"name": "Mzalendo: Senate motion", "url": "https://mzalendo.com/legislative-trends/motions/1313/"}]}, {"id": "bf-2021-flloca-programme-approval", "kind": "fund", "title": "Financing Locally-Led Climate Action (FLLoCA) Program approved", "date": "2021-10-26", "status": "Approved", "level": "National", "origin": "Government of Kenya / World Bank", "counties": ["National"], "themes": ["Devolution and PFM", "Climate adaptation and mitigation", "ASAL-friendly agenda"], "summary": "The World Bank approved a US$150m IDA credit plus a US$21.4m grant for county and ward climate resilience investments. The programme rewards counties for setting up county climate change funds.", "sources": [{"name": "World Bank press release", "url": "https://www.worldbank.org/en/news/press-release/2021/10/26/new-us-150-million-program-to-strengthen-kenya-s-resilience-to-climate-change"}]}, {"id": "bf-2021-narok-climate-change-fund-regs", "kind": "fund", "title": "Public Finance Management (Narok County Climate Change Fund) Regulations, 2021", "date": "2021-01", "status": "Gazetted", "level": "County", "origin": "County Government of Narok", "counties": ["Narok"], "themes": ["Devolution and PFM", "Climate adaptation and mitigation"], "summary": "Regulations under section 116 of the PFM Act. They put at least 3% of the county development budget into a climate fund and send 70% of it to projects proposed by ward climate change planning committees.", "sources": [{"name": "Narok County (PDF)", "url": "https://www.narok.go.ke/wp-content/uploads/2021/03/Narok-county-climate-change-fund-regualations-2021.pdf"}]}, {"id": "bf-2021-ndef-regulations", "kind": "fund", "title": "Public Finance Management (National Drought Emergency Fund) Regulations, 2021", "date": "2021", "status": "Gazetted", "level": "National", "origin": "Government of Kenya", "counties": ["National"], "themes": ["Devolution and PFM", "Climate adaptation and mitigation"], "summary": "Legal Notice 27 of 2021 sets up the National Drought Emergency Fund under the PFM Act. It finances drought response in water, livestock, health and nutrition, and coordination.", "sources": [{"name": "UNEP LEAP / FAOLEX", "url": "https://leap.unep.org/en/countries/ke/national-legislation/public-finance-management-national-drought-emergency-fund"}]}, {"id": "ef-2026-27-division-of-revenue", "kind": "fund", "title": "Equalisation Fund 2026/27: KSh 9.6bn in the Division of Revenue Bill", "date": "2026", "status": "Bill, 2026", "level": "Division of Revenue Bill", "origin": "Parliament of Kenya", "counties": ["National"], "themes": ["Devolution and PFM"], "summary": "KSh 9.60bn, 0.5% of 2021/22 audited revenue, against KSh 420bn for county equitable shares.", "sources": [{"name": "Mzalendo: Division of Revenue Bill, 2026", "url": "https://new.mzalendo.com/legislative-trends/bills/na/441/"}]}, {"id": "ef-appropriation-2025", "kind": "fund", "title": "Equalisation Fund Appropriation Bill, 2025: KSh 16.8bn for 1,424 areas in 34 counties", "date": "2026-05", "status": "Passed by the Senate, May 2026", "level": "Appropriation bill", "origin": "Parliament of Kenya", "counties": ["National", "Turkana", "West Pokot", "Narok", "Mandera", "Wajir", "Samburu", "Garissa", "Baringo", "Marsabit", "Kajiado"], "themes": ["Devolution and PFM"], "summary": "KSh 6.2bn rolled over from 2024/25 plus KSh 10.6bn for 2025/26 (KSh 7.85bn entitlement and KSh 2.75bn arrears). Turkana gets the largest share, KSh 1.86bn.", "sources": [{"name": "People Daily", "url": "https://peopledaily.digital/insights/equalisation-fund-a-constitutional-right-still-waiting-to-be-realised/amp"}, {"name": "Kenyans.co.ke", "url": "https://www.kenyans.co.ke/news/114714-turkana-west-pokot-among-34-counties-get-ksh168-billion-equalisation-fund"}]}]};</script>
+<script>
+{
+const COUNTIES=['Turkana','West Pokot','Baringo','Elgeyo Marakwet','Samburu','Laikipia','Marsabit','Isiolo','Mandera','Wajir','Garissa','Tana River','Lamu','Narok','Kajiado','National'];
+const KINDS=[['case','Court cases','Cases'],['project','Carbon projects','Carbon'],['law','Laws and regulations','Laws'],['fund','County funds and PFM','Funds'],['land','Community land','Land'],['investment','Partner investment','Partners'],['audit','Audits and budget reports','Audits'],['research','Research','Research'],['report','Reports and news','Reports']];
+const THEMES=['Carbon markets','Community land and disputes','Water','Groundwater','Conflict and peacebuilding','Natural resource governance','Climate adaptation and mitigation','Investment','Devolution and PFM','FCDC','Anti-pastoral bias','ASAL-friendly agenda','Valuing variability','Pastoral green economy','Gender','Other'];
+const LENSES=['Bias','Friendly','Both'];
+const VIEWS=['review','register','case','economy','map','partners','add','inbox','panel','how'];
+const PANELS=[['research','Research'],['policy','Policy and legal'],['funding','Funding']];
+const PILLARS=['Humanitarian','Development','Peace','Climate'];
+const CHANNELS=['National government','County government','UN agency','International NGO','Local or national NGO','Red Cross or Red Crescent','Private sector','Other'];
+const LOCAL=['County government','Local or national NGO'];
+const STAGES=['Allocated','Released','Spent','Audited'];
+const AMT=['Commitment','Disbursement','Budget','Not published'];
+const COVER=['Amount for this county','Covers this county; amount not split'];
+const AUDIT_NOTE='Audit query, not a finding of wrongdoing. Check for the county’s response.';
+const ECON=[
+ {c:'Turkana',g:1.38,pc:1320,gr:5.1,p:['Cross-border livestock trade and animal health under the IGAD transhumance protocol','Renewable energy and oil revenue with community benefit sharing','Water, irrigation and fisheries that keep grazing routes open']},
+ {c:'West Pokot',g:0.86,pc:1246,gr:4.2,p:['Community land titles (five issued in 2026) and the 2026 to 2036 land use plan','Rangeland restoration, as in the Chepareria livestock cafés','Cross-border peace and resource sharing with Karamoja']},
+ {c:'Baringo',g:0.92,pc:1233,gr:4.7,p:['Restoring rangelands invaded by Prosopis','Registering community land with women’s rights secured','Livestock, honey and other dryland value chains']},
+ {c:'Elgeyo Marakwet',g:1.17,pc:2320,gr:0.4,p:['Peace in the Kerio Valley as an economic dividend','Irrigation that keeps dry-season grazing corridors','Linking highland and lowland livestock markets']},
+ {c:'Samburu',g:0.35,pc:972,gr:5.3,p:['Community land registration with mobility safeguards','Fair benefit sharing from conservancies and carbon','Livestock marketing and off-take in good years']},
+ {c:'Laikipia',g:1.05,pc:1828,gr:3.4,p:['Shared grazing agreements between ranches and pastoralists','Conservancy income that reaches herders','Water storage and drought reserves']},
+ {c:'Marsabit',g:0.69,pc:1307,gr:4.2,p:['A county climate fund law aligned with the national carbon rules','Community benefits from wind energy','Camel, goat and sheep value chains to Ethiopia and Nairobi']},
+ {c:'Isiolo',g:0.36,pc:1109,gr:7.9,p:['The county rangeland management law and customary dedha institutions','LAPSSET corridor planning that protects grazing land','Carbon projects only with registered land and community consent']},
+ {c:'Mandera',g:0.69,pc:697,gr:6.6,p:['Camel milk and cross-border livestock trade','Putting the county climate fund to work after audit gaps','Water and groundwater for people and herds']},
+ {c:'Wajir',g:0.59,pc:664,gr:4.8,p:['Participatory rangeland management, as in Arbajahan ward','Camel milk value chains','Groundwater mapping and management']},
+ {c:'Garissa',g:0.69,pc:729,gr:4.3,p:['Camel milk and livestock market infrastructure','Water infrastructure for pastoral livelihoods','Riverine land use along the Tana that keeps grazing access']},
+ {c:'Tana River',g:0.40,pc:1097,gr:8.4,p:['Balancing irrigation schemes with dry-season grazing in the delta','Farmer and herder peace agreements','Securing community land rights in the delta']},
+ {c:'Lamu',g:0.39,pc:2270,gr:3.9,p:['Community land titles ahead of LAPSSET development','Mangrove and marine carbon with community consent','Coastal grazing access for Orma and Aweer herders']},
+ {c:'Narok',g:1.98,pc:1504,gr:4.2,p:['Slowing the loss of the commons to subdivision','Conservancy lease income for landholders','Group ranch and community land governance']},
+ {c:'Kajiado',g:1.89,pc:1454,gr:6.2,p:['Securing communal grazing land and migration corridors','Managing land sales and fencing','Peri-urban livestock and dairy markets']}
+];
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const arr=v=>Array.isArray(v)?v:(v?[v]:[]);
+const safeUrl=u=>/^https?:\/\//i.test(String(u||''))?String(u):'';
+const kindName=k=>(KINDS.find(x=>x[0]===k)||[k,'Other'])[1];
+const panelName=k=>(PANELS.find(x=>x[0]===k)||[k,k])[1];
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const now=()=>new Date().toISOString();
+const fmtDate=s=>{const d=new Date(s);return isNaN(d)?String(s||''):d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})};
+const usd=v=>'$'+(v>=10?v.toFixed(1):v.toFixed(2))+'bn';
+const use=n=>(window.claude&&typeof window.claude.use==='function')?window.claude.use(n):Promise.resolve(null);
+let db=null,user=null,cm=null,me='',isOwner=false,isEditor=false,recs=[],pend=[],runs=[],panel=[],sugg=[],gotR=false,gotP=false,routed=false,pendingRender=false,uplift=40;
+const F={county:'',kind:'',theme:'',lens:'',q:''};
+const PF={county:'',pillar:'',channel:''};
+let RB='',RS='all',IS='new';
+
+function say(m,bad){const t=$('#toast');t.textContent=m;t.className='toast show'+(bad?' bad':'');clearTimeout(say.t);say.t=setTimeout(()=>{t.className='toast'},5000)}
+function fail(e){const c=e&&e.code;if(c==='invalid_argument'){say('Your access does not allow this change. You can still comment on the page.',true)}else if(c==='quota_exceeded'){say('The hub is full. Delete old items to make room.',true)}else{say('Could not save. Try again in a moment.',true)}}
+const allItems=()=>[...recs,...pend];
+const early=()=>pend.filter(p=>!p.targetId&&tierOf(p)===1).map(p=>Object.assign({},p,{_early:true}));
+const shown=()=>[...recs,...early()];
+const isShown=x=>recs.includes(x)||(!x.targetId&&pend.includes(x)&&tierOf(x)===1);
+const titleOf=id=>{const x=allItems().find(i=>i.id===id);return x?x.title:id};
+const editing=()=>[...document.querySelectorAll('.editbox')].some(b=>b.innerHTML.trim());
+
+/* panels and tiers */
+function panelOf(p){if(p.panel&&PANELS.some(x=>x[0]===p.panel))return p.panel;const t=arr(p.themes);if(p.kind==='research')return 'research';if(['case','law','land'].includes(p.kind))return 'policy';if(['fund','project','investment','audit'].includes(p.kind))return 'funding';if(t.includes('Devolution and PFM')||t.includes('Carbon markets')||t.includes('Investment'))return 'funding';if(t.includes('Community land and disputes'))return 'policy';return 'research'}
+function tierOf(p){const t=+p.tier;if(t>=1&&t<=3)return t;if(p.targetId)return 2;const st=String(p.status||'').toLowerCase();if(p.kind==='research')return p.lens?2:1;if(p.kind==='law')return /bill|draft|review|propos/.test(st)?2:1;if(['fund','investment','audit'].includes(p.kind))return 1;return 2}
+const need=p=>tierOf(p)===1?1:2;
+const panelsOf=m=>(m&&m.panels&&m.panels.length)?m.panels:PANELS.map(x=>x[0]);
+const members=k=>panel.filter(m=>panelsOf(m).includes(k));
+const interim=k=>members(k).length<3;
+const onPanel=()=>panel.some(p=>p.id===me);
+const eligibleId=(p,id)=>members(panelOf(p)).some(m=>m.id===id)||(interim(panelOf(p))&&panel.some(m=>m.id===id));
+const canVote=p=>!!db&&!!me&&(isOwner||(isEditor&&(p?eligibleId(p,me):onPanel())));
+const votes=p=>Object.entries((p&&p.votes)||{}).filter(e=>e[1]&&e[1].v);
+const countable=(p,e)=>!!e[1].admin||eligibleId(p,e[0]);
+const conf=p=>votes(p).filter(e=>e[1].v==='confirm'&&countable(p,e)).map(e=>e[0]);
+const rejs=p=>votes(p).filter(e=>e[1].v==='reject'&&countable(p,e)).map(e=>e[0]);
+const okApprove=p=>conf(p).length>=need(p)&&(tierOf(p)<3||!!p.safetyOk);
+const okReject=p=>rejs(p).length>=need(p);
+const readyOf=p=>okApprove(p)||okReject(p);
+const who=(id,fb)=>'<span class="who" data-uid="'+esc(id)+'">'+esc(fb||'a reviewer')+'</span>';
+const whoList=ids=>ids.map(i=>who(i)).join(', ');
+
+/* names rule: show an implementer only when a public source names them, or with consent */
+const genericOf=c=>({'Local or national NGO':'a local or national NGO','International NGO':'an international NGO','UN agency':'a UN agency','County government':'the county government','National government':'the national government','Red Cross or Red Crescent':'a Red Cross or Red Crescent society','Private sector':'a private company'}[c]||'a partner organisation');
+function implName(r){if(!r.implementer)return r.channel?genericOf(r.channel):'';if(r.anonymise)return genericOf(r.channel);if(safeUrl(r.implementerSource)||r.consentAt)return r.implementer;return genericOf(r.channel)+' (named once public or with consent)'}
+const money=r=>r.amount?(((r.currency||'')+' '+Number(r.amount).toLocaleString('en-US')).trim()+(r.amountType&&r.amountType!=='Not published'?' ('+r.amountType.toLowerCase()+')':'')):(r.amountType==='Not published'?'amount not published':'');
+function fundLine(r){const flow=[r.funder,implName(r)].filter(Boolean).join(' → ');const bits=[flow,arr(r.pillars).join(', '),arr(r.sectors).join(', '),money(r),r.years,r.coverage,r.stage?'Stage: '+r.stage:''].filter(Boolean);return (bits.length?'<p class="fund">'+bits.map(esc).join(' · ')+'</p>':'')+(r.kind==='audit'?'<p class="audit">'+esc(AUDIT_NOTE)+'</p>':'')}
+
+function show(v){if(window.HUB_PUBLIC&&(!v||['review','add','inbox','panel'].includes(v)))v=v?'register':'map';if(!VIEWS.includes(v)||(v==='inbox'&&!isEditor))v=pend.length?'review':'register';VIEWS.forEach(x=>{$('#v-'+x).hidden=x!==v;$('#t-'+x).setAttribute('aria-selected',String(x===v))})}
+function go(v){if(location.hash.slice(1)===v)show(v);else location.hash=v}
+addEventListener('hashchange',()=>show(location.hash.slice(1)));
+async function openComment(el){if(!cm){say('Sign in to claude.ai to comment on this page.',true);return}try{const r=await cm.openComposer({element:el});if(!r||!r.opened)say('Close the open comment first, then try again.')}catch(err){say('Comments are not available in this view.',true)}}
+
+function figs(){
+ $('#nRec').textContent=shown().length;$('#nPend').textContent=pend.length;$('#nPanel').textContent=panel.length;
+ $('#tabPend').textContent=pend.length?'('+pend.length+')':'';
+ const nn=sugg.filter(s=>(s.status||'new')==='new').length;$('#tabInbox').textContent=nn?'('+nn+')':'';
+ const r=runs[0];$('#lastRun').textContent=window.HUB_PUBLIC?fmtDate(window.HUB_PUBLIC.snapshot):r?fmtDate(r.at)+', '+(r.added||0)+' new':'Not run yet';
+}
+function grid(){
+ const cnt=(list,c,k)=>list.filter(r=>arr(r.counties).includes(c)&&(!k||r.kind===k)).length;
+ const S=shown();const max=Math.max(1,...COUNTIES.flatMap(c=>KINDS.map(k=>cnt(S,c,k[0]))));
+ $('#grid').innerHTML='<thead><tr><th>County</th>'+KINDS.map(k=>'<th title="'+k[1]+'">'+k[2]+'</th>').join('')+'<th>To review</th></tr></thead><tbody>'+
+ COUNTIES.map(c=>'<tr><th>'+c+'</th>'+KINDS.map(k=>{const n=cnt(S,c,k[0]);const lv=n?Math.max(1,Math.ceil(n/max*4)):0;return '<td><button class="cell l'+lv+'" data-c="'+c+'" data-k="'+k[0]+'" aria-label="'+c+', '+k[1]+': '+n+'">'+(n||'·')+'</button></td>'}).join('')+'<td>'+(cnt(pend,c,'')?'<button class="pdot" data-rc="1" aria-label="'+c+': '+cnt(pend,c,'')+' waiting">'+cnt(pend,c,'')+'</button>':'')+'</td></tr>').join('')+'</tbody>';
+}
+function chips(r){return [kindName(r.kind),...arr(r.counties),r.lens||null,...arr(r.pillars)].filter(Boolean).map(x=>'<span class="chip'+(x==='Bias'?' cb':x==='Friendly'?' cf':x==='Both'?' cbo':'')+'">'+esc(x)+'</span>').join('')}
+function srcs(r){return arr(r.sources).map(s=>{const u=safeUrl(s&&s.url);return u?'<a href="'+esc(u)+'" target="_blank" rel="noopener">'+esc((s.name||'')||u.replace(/^https?:\/\//,'').slice(0,48))+'</a>':'<span>'+esc(s&&s.name)+'</span>'}).join(' · ')}
+
+function slip(p){
+ const T=tierOf(p),N=need(p),c=conf(p),r=rejs(p),mine=(p.votes||{})[me],asg=arr(p.assigned),pk=panelOf(p);
+ const okA=okApprove(p),okR=okReject(p),ready=okA||okR;
+ const notes=votes(p).filter(e=>e[1].note);
+ let h='<article class="slip'+(okA?' ready':'')+'" data-id="'+esc(p.id)+'"><div class="meta"><span class="chip tierchip t'+T+'">Tier '+T+'</span><span class="chip">'+esc(panelName(pk))+' panel'+(interim(pk)?' (interim: any reviewer)':'')+'</span>'+chips(p)+'<span class="mute">'+esc(p.batch||'Weekly search')+(p.foundAt?', '+fmtDate(p.foundAt):'')+(p.confidence?', '+esc(p.confidence)+' confidence':'')+'</span></div>'+
+ '<h3>'+esc(p.title)+'</h3>'+(p.date?'<p class="mute">'+esc(p.date)+(p.status?' · '+esc(p.status):'')+'</p>':'')+(p.summary?'<p>'+esc(p.summary)+'</p>':'')+fundLine(p)+
+ (p.targetId?'<p class="why"><b>Proposed edit</b> to the record <a href="#register" data-jump="'+esc(p.targetId)+'">'+esc(titleOf(p.targetId))+'</a>. Approving replaces that record with this version.</p>':'')+
+ (!p.targetId&&T===1?'<p class="mute">Already visible in the register as "not yet checked". Approving marks it checked; rejecting removes it.</p>':'')+(p.why?'<p class="why"><b>Check:</b> '+esc(p.why)+'</p>':'')+
+ '<p class="src">'+(srcs(p)||'<span class="mute">No source link yet</span>')+'</p>'+
+ (arr(p.links).length?'<p class="mute">Linked to: '+arr(p.links).map(l=>esc(titleOf(l))).join('; ')+'</p>':'')+
+ '<p class="tally"><b>'+Math.min(c.length,N)+' of '+N+'</b> approval'+(N>1?'s':'')+' needed'+(c.length?': '+whoList(c):'')+(r.length?' · '+r.length+' rejection'+(r.length>1?'s':'')+': '+whoList(r):'')+(T===3?' · Safety check: '+(p.safetyOk?'passed':'waiting for the administrator'):'')+'</p>'+
+ (notes.length?notes.map(e=>'<p class="mute">'+who(e[0])+': '+esc(e[1].note)+'</p>').join(''):'')+
+ (asg.length?'<p class="mute">Assigned to '+whoList(asg)+'</p>':'')+
+ (p.proposedBy?'<p class="mute">Proposed by '+who(p.proposedBy,'a contributor')+'</p>':'');
+ let a='';
+ if(canVote(p)){
+  if(ready)a+='<button class="btn ok" data-act="finalize">'+(okA?'Move to register':'Close as rejected')+'</button>';
+  else{a+=(mine?'<span class="mute">You voted to '+esc(mine.v)+'.</span>':'')+'<input class="note" placeholder="Note for other reviewers (optional)" aria-label="Note"><button class="btn ok" data-act="vconfirm">Approve</button><button class="btn warn" data-act="vreject">Reject</button><button class="btn" data-act="edit">Edit first</button>';if(T<3)a+='<button class="btn" data-act="raise">Raise to tier '+(T+1)+'</button>'}
+ }else if(isEditor){a+='<span class="mute">This item is for the '+esc(panelName(pk))+' panel. Ask the administrator to add you to it.</span>'}
+ if(cm)a+='<button class="btn" data-act="comment">Comment</button>';
+ h+='<div class="acts">'+a+'</div>';
+ if(isOwner&&!ready){
+  const pool=interim(pk)?panel:members(pk);
+  h+='<details class="adm"><summary>Administrator</summary><div class="acts">'+(pool.length?(T>=2?'<span class="mute">Assign three reviewers:</span>':'')+pool.map(m=>'<label class="ck"><input type="checkbox" name="asg" value="'+esc(m.id)+'"'+(asg.includes(m.id)?' checked':'')+'>'+who(m.id)+'</label>').join('')+'<button class="btn" data-act="assign">Save assignment</button>':'<span class="mute">Add reviewers on the Reviewer panel tab to assign this item.</span>')+'</div>'+
+  '<div class="acts"><label class="ck">Tier <select class="tiersel" aria-label="Tier">'+[1,2,3].map(t=>'<option'+(t===T?' selected':'')+'>'+t+'</option>').join('')+'</select></label><button class="btn" data-act="settier">Set tier</button><label class="ck">Panel <select class="pansel" aria-label="Panel">'+PANELS.map(k=>'<option value="'+k[0]+'"'+(k[0]===pk?' selected':'')+'>'+k[1]+'</option>').join('')+'</select></label><button class="btn" data-act="setpanel">Set panel</button></div>'+
+  '<div class="acts">'+(T===3&&!p.safetyOk?'<button class="btn ok" data-act="safety">Safety check passed</button>':'')+'<button class="btn" data-act="override">Approve now as administrator</button><button class="btn warn" data-act="oreject">Reject now</button></div></details>'}
+ return h+'<div class="editbox"></div></article>';
+}
+function reviewList(){
+ const bOf=p=>p.batch||'Weekly search';
+ return pend.filter(p=>(!RB||bOf(p)===RB)&&(RS==='all'||(RS==='mypanel'&&canVote(p))||(RS==='mine'&&arr(p.assigned).includes(me))||(RS==='needs'&&canVote(p)&&!(p.votes||{})[me]&&!readyOf(p))||(RS==='ready'&&readyOf(p))||(RS==='t3'&&tierOf(p)===3))).sort((a,b)=>(readyOf(b)-readyOf(a))||conf(b).length-conf(a).length||String(b.foundAt||'').localeCompare(String(a.foundAt||''))||String(b.date||'').localeCompare(String(a.date||'')));
+}
+function review(){
+ const bOf=p=>p.batch||'Weekly search';
+ const batches=[...new Set(pend.map(bOf))];if(RB&&!batches.includes(RB))RB='';
+ $('#rbatch').innerHTML='<option value="">All batches ('+pend.length+')</option>'+batches.map(b=>'<option value="'+esc(b)+'"'+(b===RB?' selected':'')+'>'+esc(b)+' ('+pend.filter(p=>bOf(p)===b).length+')</option>').join('');
+ const list=reviewList();
+ const bk=$('#bulk');bk.hidden=!RB||!isOwner||!list.length;bk.dataset.armed='';bk.disabled=false;bk.textContent='Approve all '+list.length+' in this batch as administrator';
+ $('#reviewSub').textContent=(canVote()?'You can vote on items for your panel. ':'')+'Tier 1 items are already visible in the register and need one approval to be marked checked; tier 2 items need two of three reviewers, and tier 3 items need two of three plus the administrator’s safety check. Anyone can comment.';
+ $('#rlist').innerHTML=list.length?list.map(slip).join(''):'<p class="empty">Nothing here. New finds from the weekly search and approved suggestions land in this queue.</p>';
+}
+function filtered(){const q=F.q.toLowerCase();return shown().filter(r=>(!F.county||arr(r.counties).includes(F.county))&&(!F.kind||r.kind===F.kind)&&(!F.theme||arr(r.themes).includes(F.theme))&&(!F.lens||r.lens===F.lens)&&(!q||[r.title,r.summary,r.notes,r.status,r.funder,implName(r)].join(' ').toLowerCase().includes(q))).sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')))}
+function rec(r,pre){
+ pre=pre||'r-';
+ const linked=allItems().filter(x=>x.id!==r.id&&(arr(r.links).includes(x.id)||arr(x.links).includes(r.id)));
+ const ap=arr(r.approvedBy);
+ let a='';
+ if(r._early){if(cm)a+='<button class="btn" data-act="comment">Comment</button>';if(canVote(r))a+='<button class="btn" data-act="gorev" data-id="'+esc(r.id)+'">Check it in the review queue</button>'}
+ else{
+ if(db&&me)a+='<button class="btn" data-act="suggest">Suggest an edit</button>';
+ if(cm)a+='<button class="btn" data-act="comment">Comment</button>';
+ if(isOwner)a+='<button class="btn" data-act="redit">Edit directly</button><button class="btn" data-act="unconfirm">Send back to review</button><button class="btn warn" data-act="del">Delete</button>';}
+ return '<details class="rec" id="'+pre+esc(r.id)+'" data-id="'+esc(r.id)+'"><summary><span class="rt">'+esc(r.title)+'</span><span class="rm">'+(r._early?'<span class="chip unck">Not yet checked</span>':'')+chips(r)+(r.date?'<span class="mute">'+esc(r.date)+'</span>':'')+'</span></summary><div class="rb">'+
+ (r.status?'<p><b>Status:</b> '+esc(r.status)+'</p>':'')+(r.summary?'<p>'+esc(r.summary)+'</p>':'')+fundLine(r)+
+ ((r.level||r.origin)?'<p class="mute">'+esc([r.level,r.origin].filter(Boolean).join(' · '))+'</p>':'')+
+ (arr(r.themes).length?'<p class="mute">Themes: '+arr(r.themes).map(esc).join(', ')+'</p>':'')+
+ '<p class="src">'+srcs(r)+'</p>'+
+ (linked.length?'<p><b>Linked:</b> '+linked.map(x=>isShown(x)?'<a href="#register" data-jump="'+esc(x.id)+'">'+esc(x.title)+'</a>':esc(x.title)+' <span class="mute">(awaiting review)</span>').join('; ')+'</p>':'')+
+ (r.notes?'<p class="mute">'+esc(r.notes)+'</p>':'')+
+ (r._early?'<p class="early">From an official or published source, shown straight away. A reviewer has not checked this summary yet; follow the source link for the original.</p>':'<p class="mute">'+(ap.length?'Approved by '+whoList(ap)+(r.adminApproved?' (administrator)':''):(r.verifiedBy?'Confirmed by '+who(r.verifiedBy):'Confirmed'))+(r.approvedAt||r.verifiedAt?' on '+fmtDate(r.approvedAt||r.verifiedAt):'')+(r.tier?' · Tier '+esc(r.tier):'')+'</p>')+
+ (a?'<div class="acts">'+a+'</div>':'')+'<div class="editbox"></div></div></details>';
+}
+function register(){
+ const open=[...document.querySelectorAll('details.rec[open]')].map(d=>d.id);
+ const list=filtered();
+ const ne=early().length;$('#rcount').textContent=list.length+' of '+(recs.length+ne)+' records'+(ne?' ('+ne+' not yet checked)':'');
+ $('#reg').innerHTML=list.length?list.map(r=>rec(r)).join(''):'<p class="empty">'+(shown().length?'No records match these filters.':'No records yet. Items move here from the review queue once reviewers approve them.')+'</p>';
+ partnersView();
+ open.forEach(id=>{const d=document.getElementById(id);if(d)d.open=true});
+}
+function partnersView(){
+ const S=shown();const inv=S.filter(r=>r.kind==='investment');
+ $('#pgrid').innerHTML='<thead><tr><th>County</th>'+PILLARS.map(p=>'<th>'+p+'</th>').join('')+'<th>Delivered locally</th></tr></thead><tbody>'+COUNTIES.map(c=>{const rows=inv.filter(r=>arr(r.counties).includes(c));const loc=rows.filter(r=>LOCAL.includes(r.channel)).length;return '<tr><th>'+c+'</th>'+PILLARS.map(p=>{const n=rows.filter(r=>arr(r.pillars).includes(p)).length;return '<td><span class="pill'+(n?' on':'')+'">'+(n||'·')+'</span></td>'}).join('')+'<td>'+(rows.length?Math.round(loc/rows.length*100)+'% of '+rows.length:'·')+'</td></tr>'}).join('')+'</tbody>';
+ const fm=S.filter(r=>STAGES.includes(r.stage));
+ $('#fmoney').innerHTML='<thead><tr><th>County</th>'+STAGES.map(s=>'<th>'+s+'</th>').join('')+'</tr></thead><tbody>'+COUNTIES.filter(c=>c!=='National').map(c=>'<tr><td>'+c+'</td>'+STAGES.map(s=>{const it=fm.filter(r=>r.stage===s&&arr(r.counties).includes(c)).sort((a,b)=>String(b.date||'').localeCompare(String(a.date||''))).at(0);return '<td>'+(it?'<a href="#register" data-jump="'+esc(it.id)+'">'+esc(it.title)+'</a>'+(it._early?' <span class="mute">(not yet checked)</span>':'')+(money(it)?'<br><span class="mute">'+esc(money(it))+'</span>':''):'<span class="mute">·</span>')+'</td>'}).join('')+'</tr>').join('')+'</tbody>';
+ const list=inv.filter(r=>(!PF.county||arr(r.counties).includes(PF.county))&&(!PF.pillar||arr(r.pillars).includes(PF.pillar))&&(!PF.channel||r.channel===PF.channel)).sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')));
+ $('#pcount').textContent=list.length+' of '+inv.length+' investments';
+ const open=[...document.querySelectorAll('#plistinv details.rec[open]')].map(d=>d.id);
+ $('#plistinv').innerHTML=list.length?list.map(r=>rec(r,'pi-')).join(''):'<p class="empty">'+(inv.length?'No investments match these filters.':'No approved investments yet. From the next weekly search, public funding data from OCHA’s Financial Tracking Service, IATI, lender and climate fund portals, Treasury, the Controller of Budget and the Auditor-General will arrive in the review queue.')+'</p>';
+ open.forEach(id=>{const d=document.getElementById(id);if(d)d.open=true});
+}
+function inbox(){
+ $('#t-inbox').hidden=!isEditor;
+ if(!isEditor)return;
+ const list=sugg.filter(s=>!IS||(s.status||'new')===IS).sort((a,b)=>String(b.at||'').localeCompare(String(a.at||'')));
+ $('#ilist').innerHTML=list.length?list.map(s=>'<article class="card" data-sid="'+esc(s.id)+'"><div class="meta">'+chips(s)+'<span class="chip">'+esc(s.status||'new')+'</span><span class="chip">'+esc(panelName(panelOf(s)))+' panel</span><span class="mute">'+(s.at?fmtDate(s.at):'')+'</span></div><h3>'+esc(s.title||'(no title)')+'</h3>'+
+ (s.targetId?'<p class="why"><b>Proposed edit</b> to <a href="#register" data-jump="'+esc(s.targetId)+'">'+esc(titleOf(s.targetId))+'</a></p>':'')+(s.summary?'<p>'+esc(s.summary)+'</p>':'')+fundLine(s)+(s.notes?'<p class="mute">'+esc(s.notes)+'</p>':'')+'<p class="src">'+srcs(s)+'</p><p class="mute">From '+who(s.by,'a contributor')+(s.decision?' · '+esc(s.decision):'')+'</p>'+
+ (isOwner&&(s.status||'new')==='new'?'<div class="acts"><button class="btn ok" data-act="route">Send to reviewers</button><input class="note" placeholder="Reason, if declining" aria-label="Reason"><button class="btn warn" data-act="decline">Decline</button></div>':'')+'</article>').join(''):'<p class="empty">No suggestions here.</p>';
+}
+function panelView(){
+ const stat=id=>{const a=pend.filter(p=>arr(p.assigned).includes(id)).length;const v=pend.filter(p=>(p.votes||{})[id]).length+recs.filter(r=>arr(r.approvedBy).includes(id)).length;return a+' assigned · '+v+' votes'};
+ const head='<div class="scroll"><table class="log"><thead><tr><th>Panel</th><th class="n">Members</th><th>How its items are approved now</th></tr></thead><tbody>'+PANELS.map(k=>'<tr><td>'+k[1]+'</td><td class="n">'+members(k[0]).length+'</td><td>'+(interim(k[0])?'Interim: any reviewer on any panel can vote, until it has three members':'Only its own members vote')+'</td></tr>').join('')+'</tbody></table></div>';
+ $('#plist').innerHTML=head+(panel.length?panel.map(m=>{const ps=panelsOf(m);return '<div class="prow" data-uid="'+esc(m.id)+'"><span>'+who(m.id,'a reviewer')+(m.id===me?' (you)':'')+'</span>'+(isOwner?'<span class="pchecks">'+PANELS.map(k=>'<label class="ck"><input type="checkbox" name="pp" value="'+k[0]+'"'+(ps.includes(k[0])?' checked':'')+'>'+k[1]+'</label>').join('')+'<button class="btn" data-act="psave">Save panels</button></span>':'<span class="mute">'+ps.map(panelName).join(', ')+'</span>')+'<span class="mute">'+stat(m.id)+'</span>'+(isOwner?'<button class="btn warn" data-act="prem">Remove</button>':'')+'</div>'}).join(''):'<p class="empty">No reviewers yet. The call for reviewers will fill the three panels.</p>');
+ if(isOwner){if(!$('#psearch'))$('#padmin').innerHTML='<h3 class="sec">Add a reviewer</h3><p class="sub">Search people in your organization or already invited to this page, add them, then tick their panels. They also need Editor access, which you give in the Share menu.</p><input id="psearch" type="search" placeholder="Name or email" aria-label="Search people"><div class="hits" id="phits"></div>'}
+ else $('#padmin').innerHTML='<p class="mute">To join a panel, answer the call for reviewers or contact the administrator at info@asalnetwork.org.</p>';
+}
+function runlog(){
+ $('#runlog').innerHTML='<thead><tr><th>Date</th><th>Searched</th><th class="n">New for review</th><th>Notes</th></tr></thead><tbody>'+(runs.length?runs.map(r=>'<tr><td>'+esc(fmtDate(r.at))+'</td><td>'+esc(r.searched||'')+'</td><td class="n">'+esc(r.added??0)+'</td><td>'+esc(r.notes||'')+'</td></tr>').join(''):'<tr><td colspan="4" class="mute">No searches yet.</td></tr>')+'</tbody>';
+}
+function economy(){
+ const u=uplift/100,rows=[...ECON].sort((a,b)=>b.g-a.g),tot=ECON.reduce((s,r)=>s+r.g,0),max=Math.max(...ECON.map(r=>r.g*(1+u)));
+ const pop=ECON.reduce((s,r)=>s+r.g*1e9/r.pc,0);
+ $('#econLead').textContent='In 2024 these 15 counties together produced about '+usd(tot)+', or roughly $'+Math.round(tot*1e9/pop).toLocaleString('en-US')+' per person. Isiolo, Tana River and Mandera were among the fastest-growing counties in Kenya from 2020 to 2024. Move the slider to see what a 20% to 100% lift in output from investment in the right enablers would mean for each county.';
+ $('#eToday').innerHTML=usd(tot)+' <small>per year</small>';
+ $('#eScen').innerHTML=uplift+'% <small>to '+usd(tot*(1+u))+' (+'+usd(tot*u)+')</small>';
+ $('#presets').innerHTML=[20,40,60,80,100].map(v=>'<button class="btn" data-up="'+v+'" aria-pressed="'+(v===uplift)+'">'+v+'%</button>').join('');
+ $('#ebars').innerHTML=rows.map(r=>'<div class="erow"><b>'+r.c+'</b><div class="track" role="img" aria-label="'+r.c+': '+usd(r.g)+' in 2024, '+usd(r.g*(1+u))+' in the scenario"><i class="t" style="width:'+(r.g/max*100).toFixed(2)+'%"></i><i class="a" style="width:'+(r.g*u/max*100).toFixed(2)+'%"></i></div><span class="ev">'+usd(r.g)+' → '+usd(r.g*(1+u))+'<small>$'+r.pc.toLocaleString('en-US')+' → $'+Math.round(r.pc*(1+u)).toLocaleString('en-US')+' per person</small></span></div>').join('');
+ const n=(list,c)=>list.filter(x=>arr(x.counties).includes(c)).length;
+ $('#paths').innerHTML=ECON.map(r=>'<div class="card"><h3>'+r.c+'</h3><p class="mute">'+usd(r.g)+' in 2024 · $'+r.pc.toLocaleString('en-US')+' per person · '+r.gr+'% average growth 2020 to 2024</p><ul>'+r.p.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul><button class="btn" data-c="'+r.c+'" data-k="">'+n(recs,r.c)+' approved records, '+n(pend,r.c)+' waiting</button></div>').join('');
+}
+/* green map */
+const KMAP=[{"n":"Nairobi","d":"M183.3 396.6L185.5 397.5L183.8 399.5L184.9 400.4L189.3 401.2L192.7 399.4L195.2 402.9L193.6 405.1L187.5 404.4L188.1 405.9L187.0 408.2L185.1 407.3L183.4 408.8L186.7 413.7L179.7 410.3L173.1 409.7L168.8 406.2L170.8 402.6L172.2 402.8L174.4 400.2L175.7 400.6L176.5 398.5L180.0 399.8L180.8 398.4L182.8 398.5Z","cx":179,"cy":406},{"n":"Mombasa","d":"M350.0 570.6L347.7 576.2L345.5 572.4L343.6 574.3L343.2 565.7L345.1 564.2L348.0 564.6L347.6 562.7L349.4 562.4L354.7 564.7L351.2 570.5Z","cx":348,"cy":568},{"n":"Kwale","d":"M328.3 541.2L329.9 543.1L330.5 550.8L332.5 551.4L331.8 555.6L338.7 560.2L341.8 564.8L341.5 566.6L343.2 566.6L343.6 574.3L345.5 572.4L347.3 574.3L346.7 575.7L353.4 578.9L345.7 596.3L331.9 612.6L327.9 615.1L322.0 607.8L275.8 575.4L305.8 564.7L311.1 552.7L304.9 548.9L307.1 545.2L312.4 548.2L314.3 541.3Z","cx":314,"cy":577},{"n":"Kilifi","d":"M351.7 561.7L347.6 562.7L347.9 564.5L345.1 564.2L343.1 566.6L341.5 566.6L341.9 564.9L338.9 560.4L331.8 555.5L332.5 551.4L330.5 550.8L329.9 543.1L328.1 541.0L314.3 541.3L322.4 511.1L362.6 465.7L380.5 491.2L378.9 503.9L380.4 506.2L383.4 506.1L379.3 509.9L378.8 515.0L376.3 519.2L377.0 522.4L376.2 524.5L367.4 530.4L368.7 529.1L368.7 526.0L366.1 526.9L365.1 529.4L367.1 531.4L361.3 544.9L359.7 545.0L358.0 543.5L356.1 543.8L357.2 543.9L357.7 544.9L356.2 544.5L357.7 545.9L360.6 545.5L361.2 549.0L355.3 563.8L351.9 564.1Z","cx":349,"cy":517},{"n":"Tana River","d":"M310.7 327.2L314.5 327.6L318.6 331.9L328.6 332.5L333.5 335.8L336.4 336.5L346.6 346.3L347.0 356.7L350.6 356.7L352.7 359.9L354.5 360.0L358.1 362.8L363.1 377.1L365.1 387.4L372.4 402.1L372.0 406.1L374.4 416.1L378.3 423.7L378.8 436.5L380.3 439.1L380.2 444.8L384.1 462.0L384.1 471.0L389.8 471.1L393.0 473.0L395.6 471.1L408.8 475.1L412.9 474.6L405.7 480.5L399.9 478.5L389.8 482.4L384.8 486.0L380.7 491.2L362.6 465.7L322.2 511.2L318.9 511.1L316.6 508.3L313.9 510.2L286.5 471.9L290.8 471.7L293.4 469.0L296.8 467.6L309.9 442.1L306.6 429.3L308.9 427.9L306.7 390.3L297.4 370.7L274.4 331.5L276.7 332.3L278.6 330.7L280.4 330.9L282.3 328.2L287.4 330.4L290.3 329.6L294.5 331.5L294.2 328.8L302.1 330.2Z","cx":342,"cy":420},{"n":"Lamu","d":"M450.0 455.2L417.4 482.9L414.2 474.5L409.0 475.1L395.9 471.2L393.0 473.0L389.8 471.1L384.1 471.0L384.1 462.0L381.8 449.4L422.6 430.1L462.8 426.7L462.9 438.0Z","cx":417,"cy":452},{"n":"Taita Taveta","d":"M258.7 488.0L264.5 492.6L270.9 501.2L276.6 506.6L281.4 505.6L285.5 506.8L289.0 509.5L295.4 509.7L297.6 510.4L297.3 511.2L310.7 508.4L314.2 510.3L316.6 508.3L318.9 511.1L322.2 511.2L312.4 548.2L307.1 545.2L304.9 548.9L311.1 552.7L305.8 564.7L275.8 575.4L236.1 547.6L235.4 542.6L233.6 539.6L229.3 537.3L225.3 538.1L226.5 535.4L224.2 534.7L224.1 533.4L229.8 528.4L230.1 526.4L231.7 526.0L230.6 517.7L240.2 517.9L242.7 500.3L244.1 499.3L245.3 493.4L247.5 494.4Z","cx":272,"cy":531},{"n":"Garissa","d":"M342.8 281.6L353.1 295.7L355.5 297.3L363.3 299.3L367.8 302.5L372.5 303.5L383.7 312.4L393.0 316.1L399.3 315.6L401.1 313.5L404.2 314.2L408.1 313.1L412.1 307.9L420.5 304.6L428.6 299.3L428.6 376.9L462.8 422.9L462.8 426.6L422.6 430.1L381.8 449.2L380.2 444.8L380.3 439.1L378.8 436.5L378.4 424.3L374.3 415.7L372.0 406.1L372.4 402.1L365.1 387.4L363.1 377.1L358.1 362.6L354.5 360.0L352.7 359.9L350.6 356.7L347.0 356.7L346.6 346.3L337.9 337.6L328.8 332.6L318.6 331.9L313.6 327.4L308.7 327.5L305.3 329.7L301.7 330.2L294.0 328.8L293.3 326.9L292.8 320.0L294.5 316.1L288.7 296.5L291.2 296.7L292.5 295.6L295.0 296.3L300.4 291.2L303.8 291.1L305.4 289.5L309.7 289.6L312.1 286.0L317.5 285.7L319.7 283.6L323.3 276.5L327.9 271.7L336.8 267.5L338.7 269.6Z","cx":390,"cy":358},{"n":"Wajir","d":"M356.2 105.4L356.2 127.0L371.0 132.9L385.2 148.8L398.6 155.1L398.7 159.2L400.3 160.6L399.1 164.0L404.5 177.0L408.7 181.5L409.6 184.6L413.3 188.3L419.0 189.9L424.3 195.9L428.6 196.6L428.6 299.3L420.5 304.6L412.0 307.9L408.1 313.1L404.2 314.2L401.1 313.5L397.8 315.9L388.7 315.1L383.2 312.1L372.5 303.5L367.8 302.5L363.3 299.3L356.1 297.7L350.4 292.4L342.8 281.6L325.7 239.0L335.9 235.0L332.9 233.3L327.5 227.1L321.2 224.1L316.8 214.7L308.7 206.7L308.1 202.9L305.2 197.4L305.1 184.7L302.3 174.5L307.8 173.0L309.3 170.5L312.8 162.9L313.1 154.2L315.8 154.1L318.0 150.0L323.8 148.0L329.8 142.9L329.4 131.0L327.0 120.7L328.2 117.1L329.0 117.1L328.9 119.2L334.8 119.9L338.7 119.2L339.9 122.6L342.2 123.2L344.4 117.9Z","cx":371,"cy":211},{"n":"Mandera","d":"M473.0 87.8L476.6 88.2L477.1 89.6L479.2 90.3L483.4 88.6L449.1 137.5L428.7 157.6L428.5 196.4L424.3 195.9L419.0 189.9L413.3 188.3L409.6 184.6L408.7 181.5L404.5 177.0L399.0 163.9L400.3 160.6L398.7 159.2L398.6 155.1L385.2 148.8L371.0 132.9L356.2 126.8L356.2 105.4L361.0 95.1L380.5 84.4L412.7 72.1L414.6 70.2L419.9 72.3L422.1 74.3L423.5 77.8L426.5 78.6L431.5 82.6L435.3 87.7L440.8 90.9L443.4 89.4L448.6 90.6L452.7 89.1L454.5 90.0L459.1 88.9L459.7 89.8L462.0 87.9L463.3 88.8L467.3 87.9L469.7 89.4L472.1 87.5Z","cx":412,"cy":135},{"n":"Marsabit","d":"M132.1 60.1L179.7 60.2L190.3 64.8L190.9 64.0L196.7 69.5L249.5 103.4L256.8 110.7L260.5 109.8L275.9 110.9L280.4 109.4L280.0 108.1L281.4 107.7L283.8 110.8L285.9 110.3L288.9 111.4L290.3 109.6L291.9 112.7L303.4 116.3L306.6 116.1L307.1 115.1L310.3 116.4L314.3 114.6L320.7 118.4L325.0 118.8L328.4 117.3L327.0 120.7L329.4 131.0L329.8 142.9L323.8 148.0L318.0 150.0L315.8 154.1L313.1 154.2L312.8 162.9L309.3 170.5L307.8 173.0L302.3 174.5L304.7 182.7L305.2 197.7L306.7 201.2L272.1 221.4L269.5 232.4L245.8 251.3L246.1 243.9L240.2 239.6L239.7 241.6L228.1 243.2L225.8 244.6L224.9 243.8L223.9 245.2L210.6 223.4L207.3 221.9L205.5 215.0L202.9 214.7L199.3 211.5L198.7 209.3L189.7 208.1L185.9 205.5L184.1 206.0L182.7 195.6L179.7 190.7L174.5 176.2L171.1 176.4L171.0 179.9L169.6 180.2L167.5 183.3L166.5 182.3L165.5 183.4L164.6 182.4L161.6 182.9L160.5 180.3L160.9 175.9L159.8 173.4L155.3 169.0L155.9 164.9L152.0 156.9L146.0 153.6L144.4 149.4L143.8 150.1L136.5 148.2L138.2 141.9L137.3 137.9L138.1 134.3L132.2 132.9Z","cx":231,"cy":156},{"n":"Isiolo","d":"M212.2 310.6L212.6 306.0L210.0 300.6L211.2 296.4L180.9 292.7L184.3 287.4L185.1 281.9L187.9 282.4L195.2 279.9L198.9 282.5L202.2 282.7L204.5 281.3L207.0 283.8L210.9 291.8L212.6 292.5L217.3 291.5L220.9 293.1L227.2 291.2L230.6 287.3L232.5 287.8L234.0 286.5L239.2 286.2L241.7 282.5L244.0 284.3L249.7 278.9L253.6 280.1L251.8 278.8L251.0 262.1L246.0 255.5L245.8 251.3L269.4 232.5L272.1 221.4L306.8 201.3L308.7 206.7L317.6 216.0L321.2 224.1L327.5 227.1L332.9 233.3L335.9 235.0L325.7 238.7L336.5 267.6L327.9 271.7L323.3 276.5L319.6 283.8L317.5 285.7L312.1 286.0L309.7 289.6L305.5 289.4L303.8 291.1L300.4 291.2L294.9 296.3L292.5 295.6L291.2 296.7L288.5 296.6L289.6 297.4L294.5 316.1L293.1 318.4L292.8 323.0L295.0 331.3L290.4 329.6L287.4 330.4L282.3 328.2L280.4 330.9L278.6 330.7L276.7 332.3L273.7 331.0L273.1 328.1L270.4 325.9L266.8 317.6L260.6 313.1L260.8 307.8L259.5 307.1L252.8 286.8L238.6 293.4L224.3 298.3L223.9 302.1L225.3 305.9L222.4 307.4L221.2 311.2L214.8 309.3Z","cx":293,"cy":265},{"n":"Meru","d":"M252.8 286.9L259.6 307.3L260.8 307.8L260.6 313.1L266.8 317.6L270.4 325.9L273.1 328.2L273.8 331.6L272.0 332.4L268.7 331.2L266.0 328.6L263.8 328.4L262.3 326.5L257.2 324.3L255.7 323.9L252.6 325.7L247.9 323.1L248.3 324.5L246.2 324.0L242.4 326.6L245.0 327.1L245.2 330.4L239.3 336.6L236.7 338.4L235.1 336.5L232.9 339.1L227.7 339.9L223.9 338.0L207.5 336.1L197.2 329.3L194.4 325.8L201.2 323.4L203.0 322.3L203.1 320.9L204.2 321.3L206.2 317.7L209.5 316.0L210.7 311.8L213.1 309.4L221.2 311.4L222.4 307.4L225.3 305.9L225.0 303.0L224.0 302.5L224.4 298.3L238.6 293.4Z","cx":236,"cy":315},{"n":"Tharaka Nithi","d":"M248.0 323.1L252.6 325.7L255.7 323.9L257.2 324.3L262.3 326.5L263.8 328.4L266.0 328.6L267.5 330.5L265.3 332.9L263.8 332.5L262.3 333.6L260.1 336.4L258.9 341.1L255.9 343.7L248.8 343.2L246.1 352.7L244.5 352.7L242.4 350.7L242.2 347.7L237.1 353.3L232.2 354.2L222.1 348.7L207.5 336.1L223.9 338.0L227.7 339.9L232.9 339.1L235.2 336.5L237.3 338.3L245.2 330.5L245.0 327.1L242.8 327.4L242.4 326.5L246.2 324.0L248.3 324.5Z","cx":246,"cy":339},{"n":"Embu","d":"M218.0 362.5L214.6 357.6L214.5 352.4L207.5 336.1L222.1 348.7L230.6 353.5L236.1 354.0L240.9 350.1L242.2 347.7L242.5 350.8L245.2 352.8L242.0 359.3L242.0 362.1L244.4 364.7L242.7 365.9L244.0 370.9L242.0 375.6L237.4 375.3L234.8 376.6L233.7 373.9L231.4 374.0L229.9 374.9L228.9 377.9L226.8 377.5L224.2 379.8L221.8 380.1L220.3 382.1L213.8 378.1L208.6 377.6L206.3 374.1L205.1 374.2L205.6 372.4L208.0 372.1L210.0 373.5L215.7 371.0L218.8 370.9L217.5 368.1Z","cx":229,"cy":358},{"n":"Kitui","d":"M267.6 330.4L272.0 332.4L274.2 331.4L297.4 370.7L306.7 390.3L309.0 427.9L306.6 429.3L309.8 442.0L296.8 467.6L293.4 469.0L290.8 471.7L286.5 471.8L313.6 509.6L310.5 508.4L297.4 511.3L297.6 510.4L295.4 509.7L288.9 509.5L285.5 506.8L280.1 505.6L277.6 503.3L274.7 498.1L274.6 493.5L265.4 472.6L262.5 471.1L261.7 468.4L256.2 466.1L253.6 462.8L251.9 457.3L250.2 456.0L247.0 457.1L246.4 450.1L243.6 443.2L244.1 441.3L242.6 437.5L239.4 433.9L240.4 432.4L239.3 428.6L230.8 417.0L235.5 416.3L238.1 414.0L237.3 410.8L233.1 407.6L230.4 401.6L224.9 395.0L224.8 392.4L233.1 392.0L236.6 394.7L237.1 394.1L241.0 385.8L239.7 385.0L240.2 383.4L238.3 380.0L239.8 375.8L242.0 375.6L244.0 370.9L242.6 366.2L244.4 364.7L242.0 362.1L242.0 359.3L245.1 352.9L246.9 351.8L248.8 343.2L255.9 343.7L258.9 341.1L262.3 333.6L263.8 332.5L265.3 332.9Z","cx":272,"cy":422},{"n":"Machakos","d":"M233.7 373.9L234.5 376.5L237.4 375.3L239.7 375.8L238.1 380.9L240.2 383.4L239.7 385.0L241.0 385.5L239.8 386.9L239.8 390.0L236.5 394.5L233.1 392.0L224.7 392.3L224.9 395.0L230.3 401.5L233.0 407.5L237.3 410.8L238.2 413.9L235.5 416.3L230.7 417.0L234.2 421.1L232.3 423.6L230.1 422.3L230.3 424.2L228.7 425.7L227.5 422.3L224.9 420.3L223.5 421.0L222.1 419.4L218.2 418.1L215.2 419.0L211.8 418.3L209.1 420.7L213.8 428.4L206.3 429.8L204.9 428.0L204.1 422.7L202.9 422.5L199.5 424.2L200.8 430.3L198.4 433.8L197.9 431.5L195.8 431.2L186.6 419.8L187.7 415.7L185.7 414.3L181.7 415.7L182.5 411.9L186.7 413.7L183.4 408.8L185.1 407.3L187.0 408.2L188.1 405.9L187.5 404.4L188.7 403.9L189.2 405.0L193.6 405.3L196.4 401.1L198.3 400.4L200.0 397.0L199.6 394.0L201.8 391.8L205.9 391.1L209.6 394.2L214.3 389.1L209.3 386.3L211.0 384.9L210.4 383.9L209.6 384.8L208.0 384.0L208.1 382.3L202.6 378.3L204.5 377.4L205.1 374.2L206.3 374.1L208.6 377.6L213.8 378.1L220.3 382.1L221.7 380.2L224.2 379.8L226.8 377.5L228.9 377.9L231.1 374.2Z","cx":213,"cy":403},{"n":"Nyandarua","d":"M157.0 318.8L160.4 324.1L163.7 322.8L165.3 326.8L167.3 326.1L168.1 328.0L164.0 328.3L162.1 331.2L163.4 333.2L167.1 333.4L168.4 336.2L170.5 337.5L166.0 345.6L165.3 349.3L166.8 350.2L166.4 351.1L169.0 355.4L169.3 361.4L171.5 364.9L171.5 368.9L173.2 373.8L172.3 373.9L172.3 375.3L170.2 372.9L168.0 373.1L169.4 373.7L166.4 376.9L164.4 376.7L165.1 379.0L162.4 382.2L161.7 381.5L162.8 377.5L160.3 369.7L161.7 368.8L160.2 364.6L157.1 364.6L156.1 361.0L153.3 361.3L152.2 352.6L150.7 349.9L147.9 350.2L147.7 349.1L145.6 350.6L144.8 347.6L142.6 347.8L141.8 343.3L143.7 341.9L141.8 339.2L141.1 335.2L142.3 333.3L143.9 334.1L144.2 329.0L145.6 326.9L154.6 324.4L153.2 323.5L155.8 321.4Z","cx":159,"cy":350},{"n":"Nyeri","d":"M193.7 327.0L207.5 336.1L201.0 353.3L199.6 353.6L199.3 357.9L197.8 358.7L197.7 361.2L199.7 363.2L199.5 365.0L196.2 365.8L188.2 361.6L183.9 363.6L180.8 363.4L175.7 361.0L172.6 361.3L171.5 364.6L169.3 361.4L168.9 355.0L166.4 351.1L166.8 350.2L165.3 349.3L166.0 345.6L170.5 337.5L168.6 336.1L175.0 333.5L178.9 333.2L178.9 335.1L180.7 335.7L181.3 337.4L179.4 338.9L180.4 342.3L188.3 344.7L190.2 337.5L188.2 335.0L187.7 331.3Z","cx":184,"cy":347},{"n":"Kirinyaga","d":"M214.4 353.5L214.6 357.6L218.1 361.9L217.5 368.1L218.8 370.9L215.7 371.0L210.0 373.5L207.9 372.0L205.6 372.4L205.1 374.2L203.2 367.2L201.9 368.4L199.2 366.0L199.8 363.4L197.7 361.2L197.8 358.7L199.3 357.9L199.6 353.6L201.0 353.3L207.5 336.1Z","cx":207,"cy":356},{"n":"Murang'a","d":"M176.1 361.1L182.1 363.7L188.4 361.6L196.2 365.8L199.1 365.2L201.9 368.4L203.2 367.2L205.1 374.2L204.5 377.4L202.6 378.3L208.2 382.3L208.0 384.0L209.6 384.8L210.3 384.0L211.0 384.9L209.3 386.3L214.3 389.1L210.7 392.7L204.9 388.1L198.3 390.2L192.8 387.8L191.3 388.9L182.3 380.9L174.1 377.0L172.4 375.4L172.3 373.9L173.1 373.8L171.5 369.0L171.6 362.2L173.0 361.0Z","cx":189,"cy":376},{"n":"Kiambu","d":"M170.2 372.9L174.1 377.0L182.3 380.8L191.0 388.8L192.1 389.0L192.8 387.8L196.5 390.2L198.3 390.2L204.9 388.1L210.7 392.7L209.6 394.1L205.8 391.1L201.8 391.8L199.6 394.0L200.0 397.0L198.3 400.4L195.4 402.6L192.7 399.4L189.5 401.2L184.3 400.0L185.5 397.5L183.1 396.6L182.8 398.5L180.8 398.4L180.0 399.8L176.5 398.5L175.7 400.6L174.4 400.2L172.1 402.8L170.8 402.6L169.0 405.8L158.5 403.2L161.7 394.6L164.5 391.1L164.8 386.1L162.3 382.6L165.1 378.8L164.4 376.8L166.4 376.9L169.4 373.7L168.0 373.1Z","cx":180,"cy":390},{"n":"Turkana","d":"M106.9 4.6L112.1 4.1L119.1 6.5L119.8 7.7L119.2 12.5L120.4 17.9L119.1 30.7L122.8 33.8L124.3 48.6L126.0 49.4L125.4 52.1L126.8 52.6L125.6 54.3L132.1 59.8L132.2 132.8L138.1 134.1L137.3 137.9L138.2 141.9L136.5 148.2L137.1 149.0L144.5 149.4L146.0 153.6L150.8 155.6L155.8 164.7L155.3 169.0L159.8 173.4L160.9 175.9L160.5 180.3L161.4 182.8L164.6 182.4L165.1 185.5L172.5 189.0L171.1 195.2L165.6 197.5L163.0 200.8L163.2 203.7L161.0 209.7L161.3 212.9L159.9 214.7L160.0 217.7L161.0 218.7L159.7 220.8L160.7 221.7L158.3 224.8L156.8 230.3L155.5 230.3L152.7 235.6L151.6 234.6L151.3 231.4L147.2 234.7L146.5 239.2L148.4 238.9L150.3 240.8L152.6 240.4L157.0 243.1L156.6 244.9L152.7 248.1L155.3 249.1L156.3 251.6L153.6 250.5L152.4 251.2L154.3 253.0L152.8 253.9L152.5 256.5L155.5 256.6L156.2 266.1L154.9 270.0L152.7 272.3L152.3 270.2L149.6 267.6L148.0 267.7L139.4 256.9L134.9 257.0L115.9 227.3L104.6 221.3L98.8 220.9L97.4 216.9L91.4 211.5L92.6 209.3L87.8 190.3L86.9 182.0L82.8 180.1L81.8 174.6L78.5 169.4L75.8 168.0L72.9 170.0L72.4 173.3L70.0 177.3L70.6 181.1L65.8 179.8L66.2 178.7L65.1 176.2L63.8 176.2L62.6 171.7L61.8 172.9L60.2 172.3L55.5 165.4L56.1 162.3L55.0 157.9L51.2 154.6L50.6 155.6L48.3 155.3L47.5 152.9L45.0 151.8L43.4 141.1L41.8 138.9L38.7 138.6L36.3 136.1L35.9 130.2L33.0 124.4L34.1 120.0L32.4 117.6L34.5 117.6L36.1 116.0L36.9 107.0L33.3 105.5L31.3 103.0L28.5 103.5L28.1 103.9L27.4 105.9L27.2 105.9L27.5 104.4L23.8 100.0L19.4 101.1L20.4 99.4L18.2 98.7L19.9 97.2L22.6 97.3L22.0 94.3L14.3 95.4L17.1 89.5L12.7 86.5L14.6 83.0L12.0 79.8L13.0 78.6L11.9 76.4L8.6 73.7L37.4 45.6L76.6 12.6L85.0 2.3L105.3 2.3Z","cx":87,"cy":137},{"n":"West Pokot","d":"M82.5 179.6L86.7 181.6L87.2 183.3L87.8 190.3L92.6 209.3L91.4 211.6L97.4 216.9L97.3 218.8L98.8 221.0L108.0 222.7L115.9 227.3L116.5 229.5L115.2 235.1L111.5 240.8L110.3 245.6L110.9 248.0L105.5 250.3L101.8 249.9L89.6 259.5L88.0 256.8L86.3 259.0L78.1 255.1L74.1 257.0L71.6 255.4L69.8 251.8L63.3 252.0L63.4 250.1L58.2 251.5L58.8 248.8L55.6 244.0L60.0 239.8L60.8 235.4L65.6 232.4L68.3 227.4L69.1 216.8L70.8 211.8L68.0 208.3L64.0 181.7L65.7 179.9L70.6 181.1L70.2 176.6L72.4 173.3L72.9 170.0L75.8 168.0L79.0 170.1L81.8 174.6Z","cx":82,"cy":214},{"n":"Samburu","d":"M174.5 176.2L179.7 190.7L182.7 195.6L184.1 206.0L185.9 205.5L189.7 208.1L198.7 209.3L199.3 211.5L202.9 214.7L205.5 215.0L207.3 221.9L210.6 223.4L223.9 245.2L224.9 243.7L225.8 244.6L228.1 243.2L239.7 241.6L240.2 239.6L246.1 243.9L246.0 255.5L251.0 262.1L251.8 278.8L253.8 280.1L249.8 278.8L244.0 284.3L241.7 282.5L239.0 286.4L234.0 286.5L232.5 287.8L230.6 287.3L227.2 291.2L220.0 293.1L217.3 291.5L210.9 291.8L207.0 283.8L204.5 281.3L202.1 282.7L199.0 282.5L195.0 279.9L187.9 282.4L185.1 281.9L183.7 283.4L180.8 282.6L178.2 275.9L176.6 274.9L171.9 277.9L158.3 278.3L158.1 275.9L152.7 272.8L154.9 270.2L156.2 266.0L155.5 256.6L152.5 256.5L152.8 253.9L154.3 253.0L152.4 251.2L153.6 250.5L156.3 251.6L155.2 249.0L153.4 249.2L152.7 248.1L156.6 244.9L157.0 243.2L152.6 240.4L150.4 240.9L148.4 238.9L146.5 239.2L147.2 234.7L151.2 231.4L151.6 234.6L152.7 235.6L155.5 230.3L156.8 230.3L158.3 224.8L160.7 221.7L159.7 220.8L161.1 218.7L160.0 217.7L159.9 214.7L161.3 212.9L161.0 209.7L163.2 203.7L163.0 200.8L165.6 197.5L171.1 195.2L172.4 190.6L172.5 189.0L165.1 185.5L165.2 182.8L166.0 183.3L166.7 182.3L167.5 183.3L169.4 180.3L171.0 179.9L171.1 176.4Z","cx":185,"cy":235},{"n":"Uasin Gishu","d":"M94.3 270.8L94.0 272.6L97.1 273.0L96.5 274.4L98.3 274.5L98.0 277.7L98.9 277.9L99.5 281.0L98.5 282.1L99.3 284.9L93.7 284.9L97.9 291.7L96.8 298.7L98.2 304.2L97.2 304.9L99.8 307.8L98.8 308.3L98.2 312.2L99.3 313.6L101.4 313.6L99.8 315.8L103.1 315.2L104.5 318.2L103.4 323.1L101.5 321.8L101.6 324.6L99.6 326.6L93.3 325.4L90.1 323.6L92.3 320.2L89.2 318.6L89.5 315.5L91.0 315.9L91.0 315.1L86.3 313.0L78.1 299.8L79.1 294.3L77.4 294.8L75.3 293.7L75.0 294.7L71.8 293.4L60.3 294.2L62.5 290.7L64.2 291.6L69.0 288.8L70.6 290.3L71.4 288.7L74.2 289.3L78.3 287.4L77.6 277.4L76.6 277.6L75.8 274.2L76.9 271.9L82.5 271.8L84.2 270.6L87.4 273.7L88.9 271.1L90.0 271.8L90.6 270.4Z","cx":88,"cy":297},{"n":"Elgeyo Marakwet","d":"M110.5 248.0L111.6 258.1L107.1 267.4L106.4 275.1L107.6 277.9L106.3 282.9L107.1 285.1L105.3 286.9L104.8 290.2L105.8 292.3L105.2 295.1L107.9 299.4L108.4 303.2L112.4 306.0L111.6 311.7L112.4 314.1L110.6 316.5L104.3 316.9L103.1 315.2L99.8 315.8L101.4 313.6L99.2 313.5L98.2 312.2L98.8 308.3L99.8 307.7L97.2 304.9L98.2 304.2L96.8 298.7L97.9 291.7L93.7 284.9L99.4 284.9L98.3 274.5L96.5 274.4L97.2 272.9L94.0 272.6L94.3 270.8L89.7 270.2L89.6 266.8L90.8 266.0L83.6 262.6L78.1 255.1L86.3 259.0L88.0 256.8L89.6 259.5L101.8 249.9L105.6 250.3Z","cx":103,"cy":280},{"n":"Nandi","d":"M71.8 293.4L75.0 294.7L75.3 293.7L77.3 294.9L78.9 294.4L77.6 298.8L80.8 304.5L86.5 313.2L91.0 315.1L89.5 315.5L89.2 318.6L92.3 320.2L91.4 322.6L89.9 323.3L95.3 325.9L93.3 328.4L94.5 331.6L91.4 333.6L87.5 332.2L82.6 333.4L82.3 329.2L78.2 329.2L75.2 327.3L73.0 331.0L69.6 330.2L68.4 328.2L64.4 329.2L57.9 328.5L58.6 325.6L54.1 329.0L53.5 326.8L59.2 325.2L60.7 319.8L63.9 317.8L66.5 312.6L67.8 312.7L65.5 307.5L66.1 301.4L63.5 296.7L60.2 294.3Z","cx":77,"cy":314},{"n":"Baringo","d":"M115.9 227.8L134.9 257.0L139.4 256.9L148.0 267.7L149.6 267.6L152.3 270.2L152.7 272.8L158.4 276.2L153.4 284.0L149.9 287.4L145.7 289.1L146.7 293.2L142.8 302.0L144.7 306.6L142.6 307.8L146.6 311.9L146.3 314.7L144.4 316.1L141.2 313.0L139.9 313.4L141.0 315.0L137.9 315.9L136.7 323.5L135.4 323.4L135.9 326.7L134.7 327.7L129.5 325.2L129.0 323.5L126.9 323.5L126.7 321.8L125.5 321.3L124.8 322.9L127.7 326.3L126.0 330.2L124.1 331.9L121.7 329.2L118.3 334.1L117.5 333.0L116.5 333.8L115.4 338.7L112.5 339.3L112.8 336.5L110.4 331.5L108.2 331.7L109.1 330.0L107.5 330.7L106.9 329.1L100.4 326.2L101.6 324.6L101.5 321.8L103.5 323.2L104.3 316.9L110.6 316.5L112.4 314.1L111.6 311.5L112.3 305.8L108.4 303.2L108.2 300.3L105.2 295.1L105.8 292.3L104.8 289.8L105.4 286.8L107.1 285.0L106.3 282.9L107.6 277.9L106.4 275.1L107.1 267.4L109.3 264.6L111.6 258.1L110.3 245.6L112.2 238.8L115.2 235.1Z","cx":130,"cy":283},{"n":"Laikipia","d":"M176.6 274.9L181.0 282.8L184.0 283.4L184.9 282.5L184.3 287.4L180.9 292.7L211.1 296.4L210.0 300.5L212.5 305.8L212.7 309.5L210.7 311.8L209.4 316.1L206.5 317.4L202.8 322.4L194.8 325.4L195.8 329.2L193.7 326.4L190.6 329.9L187.7 331.3L188.2 335.0L190.2 337.5L188.3 344.7L180.4 342.3L179.5 338.9L181.3 337.4L180.7 335.6L178.9 335.1L178.9 333.2L175.0 333.5L168.4 336.2L167.1 333.4L162.3 332.4L162.4 330.3L164.0 328.3L168.1 328.0L167.3 326.1L165.3 326.8L163.7 322.8L160.4 324.1L157.0 318.8L155.8 321.4L153.2 323.5L154.6 324.4L150.9 325.8L148.8 325.5L144.5 328.2L145.2 325.8L144.4 323.6L146.4 320.3L144.4 316.1L146.8 312.9L142.6 307.8L144.7 306.6L144.5 304.5L142.7 303.2L146.7 293.2L145.8 289.1L149.9 287.4L153.3 284.0L158.2 276.4L158.3 278.3L169.5 278.2L173.2 277.4L174.4 275.6Z","cx":178,"cy":311},{"n":"Nakuru","d":"M144.6 323.4L145.2 325.8L143.8 334.1L142.3 333.3L141.1 335.2L141.8 339.2L143.7 341.9L141.8 343.3L142.5 347.4L144.8 347.6L145.6 350.6L147.7 349.1L147.9 350.2L150.7 349.9L152.2 352.6L153.2 361.3L156.1 361.0L157.1 364.6L159.7 363.9L160.5 365.4L161.7 368.8L160.3 369.7L162.7 377.6L161.7 381.5L164.9 386.6L164.5 390.9L161.2 396.3L149.2 389.8L144.9 381.9L141.4 383.0L140.3 381.9L138.6 377.3L140.3 375.2L140.5 372.9L135.1 367.6L134.9 365.4L125.1 369.4L121.6 365.3L124.0 365.2L126.1 367.0L127.9 364.8L125.9 360.5L119.0 356.7L119.3 355.0L118.0 355.5L116.9 354.5L115.5 359.3L113.5 358.8L111.7 360.3L109.9 366.0L107.6 369.0L105.0 366.5L104.3 362.4L93.9 345.2L100.8 342.7L103.4 344.0L103.9 345.6L104.6 343.7L105.4 344.7L106.9 344.3L109.3 336.9L105.7 336.5L104.9 334.6L106.4 333.2L106.0 332.0L108.5 330.1L108.2 331.7L110.4 331.5L112.8 336.5L112.5 339.3L115.4 338.7L116.5 333.8L117.5 333.0L118.3 334.0L121.7 329.2L124.1 331.9L126.0 330.2L127.7 326.3L124.9 322.9L125.5 321.3L126.7 321.8L126.9 323.5L129.0 323.5L129.5 325.2L134.7 327.8L135.9 326.7L135.4 323.4L136.7 323.5L137.9 315.9L141.0 314.9L140.1 313.2L143.2 314.5L145.7 318.2L146.4 320.3Z","cx":135,"cy":355},{"n":"Narok","d":"M90.0 385.5L94.3 383.7L94.9 380.8L101.9 374.3L94.6 370.3L92.9 365.7L104.3 362.4L104.9 366.3L107.8 369.1L111.7 360.3L113.4 358.9L115.5 359.3L116.9 354.5L118.0 355.5L119.2 355.1L119.0 356.7L123.4 359.8L125.9 360.5L127.9 364.7L127.0 366.0L126.1 367.0L124.0 365.2L121.6 365.2L125.1 369.4L134.9 365.4L135.1 367.5L140.5 372.9L140.3 375.2L138.6 377.3L139.2 379.2L141.4 383.0L145.0 382.1L149.2 389.8L149.9 397.5L132.0 416.5L134.2 421.5L132.3 424.1L132.9 428.9L131.6 429.7L129.9 435.3L131.4 436.5L132.1 439.2L130.7 440.4L131.6 441.5L130.6 452.1L129.1 452.1L129.1 453.3L52.9 410.4L50.3 400.1L46.6 396.3L46.1 391.6L44.4 388.1L47.8 385.0L50.9 385.2L69.8 380.4L74.0 381.4L83.6 389.2Z","cx":97,"cy":405},{"n":"Kajiado","d":"M168.7 405.2L174.0 410.1L178.2 409.9L182.7 411.7L182.2 416.2L185.5 414.3L187.7 415.7L186.5 419.7L195.8 431.2L198.0 431.6L198.7 433.9L197.6 437.4L200.2 443.0L203.2 443.2L205.9 446.8L210.8 447.9L224.7 456.4L230.9 457.0L232.5 458.5L229.6 460.9L229.1 464.5L224.8 465.8L240.0 483.3L244.8 490.5L245.1 494.2L244.1 499.3L242.7 500.3L240.0 518.1L230.6 517.7L229.3 510.7L219.7 504.3L129.1 453.3L129.1 452.1L130.6 452.1L131.6 441.5L130.7 440.4L132.1 439.2L130.0 435.4L130.3 433.6L131.6 429.7L132.9 428.9L131.9 426.0L134.2 421.5L132.0 416.5L149.9 397.5L149.2 389.9L161.2 396.3L158.5 403.2Z","cx":177,"cy":455},{"n":"Makueni","d":"M218.2 418.1L222.1 419.4L223.8 421.2L224.9 420.3L226.2 421.1L228.7 425.8L230.3 424.1L230.1 422.3L232.1 423.6L233.8 421.3L235.4 422.2L239.7 429.8L240.4 432.4L239.3 433.9L242.6 437.5L244.1 441.4L243.6 443.2L246.4 450.1L247.0 457.1L250.2 456.0L251.9 457.3L253.6 462.8L256.0 465.9L261.7 468.5L262.4 471.0L265.4 472.6L274.9 494.3L274.1 495.8L274.8 498.3L279.9 506.1L276.5 506.5L270.9 501.2L264.5 492.6L258.6 488.1L247.5 494.4L245.3 493.4L244.4 489.6L243.1 489.2L240.0 483.3L224.8 465.8L229.1 464.5L229.6 460.9L232.5 458.5L230.9 457.0L224.5 456.3L211.9 448.5L206.0 446.8L203.2 443.2L200.5 443.2L199.3 442.1L197.6 435.8L200.8 430.3L199.5 424.2L204.1 422.7L204.9 428.0L206.3 429.9L211.5 429.4L213.8 428.4L209.2 420.7L211.9 418.3L215.2 419.0Z","cx":241,"cy":462},{"n":"Kericho","d":"M96.5 326.3L100.3 326.2L107.0 329.2L107.4 330.7L104.9 334.9L105.7 336.5L109.2 336.9L108.0 343.0L106.2 344.7L104.6 343.7L103.9 345.6L103.4 344.0L100.8 342.6L93.9 345.2L97.4 351.1L94.7 354.4L87.7 357.7L86.1 356.5L87.8 352.4L82.9 352.6L82.2 355.6L79.7 356.8L81.0 360.8L83.2 362.6L82.7 364.0L79.6 366.4L74.2 366.4L73.9 363.0L72.5 364.2L72.5 357.6L71.0 356.8L71.8 353.9L69.3 348.5L69.6 346.9L72.0 345.0L72.9 340.0L75.2 339.1L77.0 336.4L81.0 336.8L85.1 341.2L89.6 341.4L88.9 337.6L86.8 337.6L82.6 333.5L87.5 332.2L91.4 333.6L94.5 331.7L93.3 328.4L93.8 326.9L95.2 325.5L97.0 325.5Z","cx":82,"cy":346},{"n":"Kakamega","d":"M70.4 273.5L75.8 274.2L76.6 277.6L77.6 277.4L78.3 287.3L74.2 289.3L71.5 288.6L70.6 290.3L69.0 288.8L64.2 291.6L62.5 290.7L60.2 294.2L63.5 296.8L66.4 302.1L65.3 306.0L67.7 312.6L64.5 315.1L58.0 316.0L57.9 317.9L46.3 319.6L42.5 321.6L41.7 318.8L37.5 320.9L36.5 319.5L38.0 318.0L34.6 318.1L35.5 317.2L34.9 314.3L32.1 316.4L33.1 311.5L31.5 308.6L32.1 306.0L34.3 304.9L29.9 301.4L33.4 298.6L35.2 299.3L38.1 298.1L40.9 300.4L42.0 299.0L43.7 299.7L44.4 301.6L44.6 300.4L46.7 299.4L49.1 299.4L51.1 296.7L57.6 291.8L57.2 290.8L59.0 289.4L59.7 287.0L64.7 284.9L64.7 282.7L67.7 281.7L70.5 282.5L73.0 281.2L72.9 279.5L69.8 275.4Z","cx":57,"cy":297},{"n":"Vihiga","d":"M58.0 316.0L64.5 315.1L64.0 317.6L60.7 319.8L59.2 325.2L53.5 326.8L53.8 328.4L45.2 326.4L43.6 329.3L41.2 328.1L42.4 321.9L44.3 320.2L50.2 319.6L53.2 318.2L54.7 318.7L56.8 317.4L58.0 317.9Z","cx":51,"cy":324},{"n":"Bungoma","d":"M43.8 258.1L48.7 262.1L48.1 263.8L53.4 270.8L57.0 272.4L56.3 273.6L57.6 278.6L70.2 273.8L70.5 277.2L73.1 280.2L71.4 282.2L67.7 281.7L64.7 282.7L63.6 285.9L59.7 287.0L59.0 289.5L57.2 290.8L57.6 291.8L51.1 296.7L49.1 299.4L46.7 299.4L44.6 300.4L44.4 301.7L43.9 299.8L42.0 299.0L40.9 300.4L38.1 298.1L35.4 299.3L32.4 298.8L32.2 297.4L33.5 296.5L31.1 293.4L31.3 290.8L32.1 288.6L34.2 287.4L33.3 283.6L34.9 283.5L35.1 282.5L30.8 280.4L34.0 278.4L33.6 277.2L35.8 275.3L40.4 261.1L43.5 261.1Z","cx":52,"cy":279},{"n":"Busia","d":"M27.9 281.3L34.5 281.7L35.1 283.0L33.3 283.6L34.2 287.4L32.1 288.6L31.2 291.0L31.1 293.4L33.5 296.8L29.8 301.7L34.3 304.9L32.1 306.0L31.0 308.9L24.1 308.3L21.3 310.0L21.2 311.3L18.6 309.1L16.1 312.6L15.7 318.9L13.4 320.0L11.6 327.1L10.0 328.8L6.0 328.7L3.7 320.7L12.5 307.7L15.4 305.1L14.4 299.7L16.2 298.2L17.4 292.0L20.9 289.5L25.6 288.6L25.7 286.4L27.7 285.3Z","cx":25,"cy":305},{"n":"Siaya","d":"M25.0 308.6L31.7 308.7L33.1 311.5L32.1 316.4L34.8 314.4L34.8 318.2L37.9 318.0L36.5 319.3L37.5 320.9L41.7 318.8L42.5 320.7L42.6 324.2L41.1 327.9L36.7 329.6L34.0 332.2L38.0 345.1L26.9 352.9L25.3 352.1L23.5 347.5L5.9 347.4L8.0 334.9L6.0 328.7L10.0 328.8L11.6 327.1L13.4 320.0L15.7 318.9L16.1 312.6L18.6 309.2L21.3 311.2L21.3 310.0Z","cx":21,"cy":331},{"n":"Homa Bay","d":"M51.3 342.6L58.7 350.3L62.5 351.1L64.0 350.2L63.9 351.2L66.1 352.0L69.6 350.6L70.3 351.6L60.1 357.7L51.8 360.6L50.2 363.2L48.6 363.3L47.3 366.7L44.6 366.1L42.5 367.1L41.0 371.6L38.2 374.3L36.9 378.9L32.5 376.1L31.9 377.9L28.4 379.0L24.3 376.2L21.0 371.7L14.3 374.2L13.8 375.5L4.6 375.4L4.1 361.2L5.9 347.4L23.5 347.6L25.3 352.1L26.7 352.9L40.9 343.4Z","cx":28,"cy":361},{"n":"Migori","d":"M42.5 367.1L47.1 366.8L47.5 369.3L45.6 377.7L47.5 385.1L44.4 388.1L44.5 389.2L46.1 391.6L46.5 396.4L50.3 400.0L52.9 410.4L13.8 388.3L11.5 389.8L10.1 387.2L5.1 387.2L4.6 375.4L13.8 375.5L14.3 374.2L17.5 373.8L20.9 371.7L24.1 376.2L26.1 376.6L28.4 379.0L31.9 377.9L32.5 376.1L36.9 378.9L38.2 374.3L41.0 371.6Z","cx":30,"cy":389},{"n":"Kisii","d":"M56.2 367.6L65.8 373.6L69.8 380.4L49.6 385.4L47.1 384.9L45.7 377.6L46.5 376.8L48.2 363.9L50.2 363.2L51.8 360.6L54.1 360.6L55.2 359.1L61.1 357.4L62.4 363.6L59.7 362.9L57.7 367.0Z","cx":54,"cy":371},{"n":"Bomet","d":"M90.0 385.5L83.6 389.2L74.2 381.5L69.8 380.4L70.4 377.9L71.7 378.3L74.5 375.2L71.9 369.6L73.3 368.5L72.4 365.8L73.4 363.0L73.9 366.1L76.3 366.9L79.6 366.4L82.8 364.0L83.3 362.5L81.0 360.8L79.7 356.8L82.2 355.6L82.9 352.6L87.8 352.4L86.1 356.5L87.7 357.7L94.7 354.4L97.4 351.1L104.3 362.4L92.9 365.9L94.6 370.3L101.8 374.3L94.9 380.8L94.3 383.8Z","cx":83,"cy":370},{"n":"Nyamira","d":"M71.6 355.2L71.0 356.9L72.4 357.5L72.3 366.5L73.3 368.5L71.9 369.6L74.5 375.2L71.7 378.3L70.4 377.9L69.8 380.4L65.7 373.4L55.8 367.6L57.7 367.0L59.7 362.9L62.4 363.6L60.7 357.2L61.6 356.5L70.3 351.9Z","cx":65,"cy":365},{"n":"Kisumu","d":"M57.5 328.0L64.4 329.2L68.4 328.2L69.6 330.2L73.0 331.0L75.2 327.3L78.1 329.2L81.4 328.8L83.1 334.3L84.3 334.2L86.8 337.6L88.9 337.6L89.6 341.4L85.3 341.3L81.2 337.0L77.0 336.4L75.2 339.1L72.9 340.0L72.0 345.0L69.5 347.1L69.6 350.6L68.2 351.8L64.9 351.7L64.0 350.2L58.7 350.3L54.3 344.5L51.2 342.6L40.9 343.4L38.0 345.1L34.0 332.5L34.5 331.2L41.2 328.1L43.6 329.3L45.2 326.4L50.8 328.2L52.6 327.4L54.1 328.9L58.8 325.7Z","cx":56,"cy":338},{"n":"Trans Nzoia","d":"M63.5 250.1L63.3 252.0L69.8 251.8L71.6 255.4L74.1 257.0L78.1 255.1L83.6 262.6L90.8 266.0L89.3 269.0L90.6 270.4L90.0 271.8L88.9 271.1L87.4 273.6L84.2 270.6L82.3 271.9L76.9 271.9L75.2 274.6L71.7 273.0L57.6 278.6L56.3 273.6L56.9 272.3L53.4 270.8L48.1 263.8L48.8 262.1L43.9 258.1L48.0 256.4L49.2 254.7L56.7 253.8L58.2 251.5Z","cx":69,"cy":265}];
+const STAGES_G=[['Starting','#b9824a'],['Building','#d9b15f'],['Green-ready','#8cc26b'],['Green','#2e8b4e']];
+const SECTORS=[["Mobility and access to grazing", 15, "Migration corridors, dry-season reserves, cross-border grazing agreements", "Routes and reserves mapped, protected in county plans and open"], ["Drought risk management and climate adaptation", 15, "Early warning, early off-take, fodder banks, livestock insurance, restocking", "Livestock deaths per drought falling; herds recover faster"], ["Rangelands managed by herders", 15, "Restoration, reseeding, Prosopis control, grazing plans run by customary institutions", "Pasture and vegetation condition against a baseline"], ["Livestock, milk and meat markets", 13, "Market access, fair prices, cold chain, processing, feedlots and finishing linked to herders", "Share of livestock value kept in the county; herders’ income"], ["Secure communal land", 12, "Community land registration that keeps grazing rights; recognised customary rules", "Share of communal land registered with grazing rights intact"], ["Water planned for mobility", 12, "Water points spread along routes, not clustered in towns", "Water within reach along routes in the dry season"], ["Animal health", 8, "Vaccination, community animal health workers, disease surveillance", "Herd losses to disease falling"], ["Pastoral-led finance and decisions", 5, "County climate funds run through ward committees; women and youth in value chains", "Share of funds decided and spent locally; women’s and youth’s share"], ["Low-carbon rangelands", 5, "Soil carbon with community consent and fair benefit sharing, Prosopis biochar, solar pumping and milk cooling", "Community-approved carbon income and clean energy at water points"]];
+const ES={'Turkana':13.8,'Mandera':12.2,'Wajir':10.3,'Narok':9.6,'Garissa':8.7,'Kajiado':8.7,'Marsabit':7.9,'Tana River':7.1,'Baringo':7.0,'West Pokot':6.9,'Samburu':5.9,'Laikipia':5.6,'Isiolo':5.1,'Elgeyo Marakwet':5.0,'Lamu':3.4};
+const EFK={'Turkana':1.86,'West Pokot':1.68,'Narok':1.275,'Mandera':1.22,'Wajir':1.18,'Samburu':1.075,'Garissa':1.0,'Baringo':0.967,'Marsabit':0.764,'Kajiado':0.099};
+const SERV=['Education','Health','Roads','Electricity','Water and sanitation'];
+const M={mode:'green',bud:15,nat:15,ext:1800,y:15,need:1200,back:1000,clim:2,fx:129,ret:20,sel:'',timer:null,sh:SECTORS.map(s=>s[1])};
+const shareOf=i=>{const t=M.sh.reduce((a,b)=>a+b,0)||1;return M.sh[i]/t};
+const fmtM=v=>v>=0.995e9?'$'+(v/1e9).toFixed(1)+'bn':'$'+Math.round(v/1e6).toLocaleString('en-US')+'m';
+const pct=v=>Math.round(v*100)+'%';
+function invFor(c){return shown().filter(r=>r.kind==='investment'&&arr(r.counties).includes(c))}
+const econF=()=>M.need/((M.need+M.back)||1),grow=t=>Math.pow(1+M.clim/100,t);
+function plan(){
+ const rows=ECON.map(r=>{const pop=r.g*1e9/r.pc,base=pop*(M.need+M.back),cty=M.bud/100*(ES[r.c]||0)*1e9/M.fx,nat=M.nat/100*(ES[r.c]||0)*1e9/M.fx,ef=(EFK[r.c]||0)*1e9/M.fx,dom=cty+nat+ef,gap=Math.max(0,base*grow(M.y)-dom*M.y);return {r,c:r.c,pop,base,cty,nat,ef,dom,gap}});
+ const G=rows.reduce((a,x)=>a+x.gap,0),E=M.ext*1e6;
+ rows.forEach(x=>{x.ext=G?E*x.gap/G:0;x.inv=x.dom+x.ext;
+  let cum=0,cumE=0,yrs=null,cumGain=0,gain25=0,payback=null,cost=0,upT=0;
+  for(let t=0;t<60;t++){const g=M.ret/100*cumE;cumGain+=g;if(t<25)gain25+=g;if(t===M.y-1)upT=g;
+   if(t<M.y){cum+=x.inv;cumE+=x.inv*econF();cost+=x.inv;if(yrs===null&&cum>=x.base*grow(t+1))yrs=t+1}
+   if(payback===null&&t>=M.y-1&&cost&&cumGain>=cost)payback=t+1}
+  Object.assign(x,{yrs,gain25,payback,cost,upT,upPct:upT/(x.r.g*1e9*Math.pow(1+x.r.gr/100,M.y)),needed:x.gap/M.y});
+  x.progAt=Y=>{const yy=Math.min(Y,M.y);return yy<=0?0:Math.min(1,x.inv*yy/(x.base*grow(yy)))};
+  x.stageAt=Y=>{const p=x.progAt(Y);return p>=1?3:p>=2/3?2:p>=1/3?1:0};});
+ return {rows,G,E,need:rows.reduce((a,x)=>a+x.base*grow(M.y),0)};
+}
+function mapView(){
+ const svg=$('#kmap');if(!svg)return;
+ $('#mgreen').setAttribute('aria-pressed',String(M.mode==='green'));$('#mfund').setAttribute('aria-pressed',String(M.mode==='fund'));
+ $('#mgctl').hidden=M.mode!=='green';$('#mgsect').hidden=M.mode!=='green';$('#mmixw').hidden=M.mode!=='green';
+ $('#mbv').textContent=M.bud+'%'+(M.bud<15?' (below the AHN minimum)':M.bud===15?' (AHN minimum)':'');
+ $('#mnv').textContent=M.nat+'% (matching county budgets)';$('#mev').textContent=fmtM(M.ext*1e6)+' a year';$('#myv').textContent=M.y+' years';
+ const P=plan(),byC=Object.fromEntries(P.rows.map(x=>[x.c,x])),Yshow=M.timer?M.yPlay:M.y;
+ const fcol=n=>n>=6?'#1f6f8b':n>=3?'#4d9bb8':n>=1?'#9fcfe0':'#e9e2d6';
+ svg.innerHTML=KMAP.map(k=>{const x=byC[k.n];let fill='var(--mapoff)';if(x)fill=M.mode==='green'?STAGES_G[x.stageAt(Yshow)][1]:fcol(invFor(k.n).length);return '<path d="'+k.d+'" fill="'+fill+'" stroke="var(--mapline)" stroke-width="'+(k.n===M.sel?2.5:0.6)+'"'+(x?' class="mc" data-county="'+esc(k.n)+'" tabindex="0" role="button" aria-label="'+esc(k.n)+'"':'')+'/>'}).join('')+
+ KMAP.filter(k=>byC[k.n]).map(k=>'<text x="'+k.cx+'" y="'+k.cy+'" class="mlab">'+esc(k.n)+'</text>').join('');
+ $('#mlegend').innerHTML=M.mode==='green'?STAGES_G.map(s=>'<span><i style="background:'+s[1]+'"></i>'+s[0]+'</span>').join('')+'<span><i style="background:var(--mapoff)"></i>Not in the hub</span>'+(M.timer?'<span><b>Year '+Yshow+'</b></span>':''):[['None yet','#e9e2d6'],['1 to 2','#9fcfe0'],['3 to 5','#4d9bb8'],['6 or more','#1f6f8b']].map(s=>'<span><i style="background:'+s[1]+'"></i>'+s[0]+' investments</span>').join('');
+ if(M.mode==='green'){
+  const R=P.rows,S=k=>R.reduce((a,x)=>a+x[k],0),cty=S('cty'),nat=S('nat'),ef=S('ef'),ext=S('ext'),tot=cty+nat+ef+ext,need=P.need/M.y,nG=R.filter(x=>x.yrs&&x.yrs<=M.y).length,sorted=[...R].sort((a,b)=>(a.yrs??999)-(b.yrs??999)),cost=S('cost'),gain=S('gain25'),upT=S('upT');
+  $('#mlead').innerHTML='With counties putting <b>'+M.bud+'%</b> of their budgets into pastoralism-friendly investment, the national government <b>'+M.nat+'%</b>, the Equalisation Fund, and <b>'+fmtM(ext)+' a year</b> from partners and climate finance, <b>'+nG+' of 15 counties turn green within '+M.y+' years</b>'+(sorted[0].yrs&&sorted[0].yrs!==sorted.at(-1).yrs?' ('+sorted[0].c+' first, in about '+sorted[0].yrs+' years)':'')+'. '+(nG<15?'The others reach '+[2,1,0].map(k=>{const n=R.filter(x=>!(x.yrs&&x.yrs<=M.y)&&x.stageAt(M.y)===k).length;return n?n+' '+STAGES_G[k][0]:''}).filter(Boolean).join(', ')+'. ':'')+(nG<15?'To turn <b>all 15</b> green in '+M.y+' years, external finance needs to be about <b>'+fmtM(P.G/M.y)+' a year</b>. ':'That is enough for all 15. ')+'Together that is '+fmtM(tot)+' a year against about '+fmtM(need)+' a year needed. '+(cost?'It pays back: by year '+M.y+' the counties produce about <b>'+fmtM(upT)+' more a year</b>, and over 25 years each $1 returns about <b>$'+(gain/cost).toFixed(1)+'</b>.':'');
+  $('#mstack').innerHTML='<thead><tr><th>Who pays</th><th class="n">Per year, 15 counties</th><th class="n">Share</th></tr></thead><tbody>'+
+   '<tr><td><i class="sw s1"></i>Counties’ own budgets at '+M.bud+'%</td><td class="n">'+fmtM(cty)+'</td><td class="n">'+pct(cty/(tot||1))+'</td></tr>'+
+   '<tr><td><i class="sw s4"></i>National government at '+M.nat+'%</td><td class="n">'+fmtM(nat)+'</td><td class="n">'+pct(nat/(tot||1))+'</td></tr>'+
+   '<tr><td><i class="sw s2"></i>Equalisation Fund (2025/26)</td><td class="n">'+fmtM(ef)+'</td><td class="n">'+pct(ef/(tot||1))+'</td></tr>'+
+   '<tr><td><i class="sw s3"></i>External: development partners, climate funds, private sector and carbon (with consent), disaster risk finance and insurance. Shared out by each county’s gap.</td><td class="n">'+fmtM(ext)+'</td><td class="n">'+pct(ext/(tot||1))+'</td></tr>'+
+   '<tr><td><b>Total</b> (needed to turn all 15 green in '+M.y+' years: '+fmtM(need)+')</td><td class="n"><b>'+fmtM(tot)+'</b></td><td class="n"><b>'+pct(tot/(need||1))+' of need</b></td></tr></tbody>';
+  const sc=M.sel?byC[M.sel]:null,eF=econF();
+  $('#msect').innerHTML='<thead><tr><th>What the money pays for</th><th class="n">Share</th><th class="n">Per year, 15 counties</th>'+(sc?'<th class="n">'+esc(M.sel)+' per year</th>':'')+'</tr></thead><tbody>'+
+   '<tr><td colspan="'+(sc?4:3)+'"><b>A. Pastoralism-friendly investment</b></td></tr>'+SECTORS.map((s,i)=>{const f=shareOf(i)*eF;return '<tr><td>'+s[0]+'</td><td class="n">'+pct(f)+'</td><td class="n">'+fmtM(tot*f)+'</td>'+(sc?'<td class="n">'+fmtM(sc.inv*f)+'</td>':'')+'</tr>'}).join('')+
+   '<tr><td colspan="'+(sc?4:3)+'"><b>B. Catching up on basic services</b></td></tr>'+SERV.map(s=>{const f=(1-eF)/SERV.length;return '<tr><td>'+s+'</td><td class="n">'+pct(f)+'</td><td class="n">'+fmtM(tot*f)+'</td>'+(sc?'<td class="n">'+fmtM(sc.inv*f)+'</td>':'')+'</tr>'}).join('')+'</tbody>';
+  $('#mmix').innerHTML=SECTORS.map((s,i)=>'<label class="mixrow"><span>'+s[0]+'</span><input type="range" min="0" max="40" step="1" value="'+M.sh[i]+'" data-sh="'+i+'" aria-label="'+esc(s[0])+' share"><b>'+pct(shareOf(i))+'</b><span class="mute">'+fmtM(tot*eF*shareOf(i))+' a year</span></label>').join('');
+  $('#mtable').innerHTML='<thead><tr><th>County</th><th>Stage after '+M.y+' years</th><th class="n">Years to Green</th><th class="n">Own budget</th><th class="n">National</th><th class="n">Equalisation Fund</th><th class="n">External</th><th class="n">External needed to be green in '+M.y+' years</th><th class="n">Output added a year by year '+M.y+'</th></tr></thead><tbody>'+sorted.map(x=>'<tr><td>'+x.c+'</td><td><i class="sw" style="background:'+STAGES_G[x.stageAt(M.y)][1]+'"></i>'+STAGES_G[x.stageAt(M.y)][0]+'</td><td class="n">'+(x.yrs??'more than '+M.y)+'</td><td class="n">'+fmtM(x.cty)+'</td><td class="n">'+fmtM(x.nat)+'</td><td class="n">'+(EFK[x.c]?fmtM(x.ef):'<span class="mute">not found</span>')+'</td><td class="n">'+fmtM(x.ext)+'</td><td class="n">'+fmtM(x.needed)+'</td><td class="n">'+fmtM(x.upT)+' (+'+pct(x.upPct)+')</td></tr>').join('')+'</tbody>';
+ }else{
+  const all=shown().filter(r=>r.kind==='investment');
+  $('#mlead').textContent=all.length?all.length+' published investments are on the map. Tap a county to see who funds what there. Projects that cover several counties without splitting the money appear in each of them.':'No published investments are on the map yet. From Monday, the weekly search adds funding published on OCHA’s Financial Tracking Service, IATI, lender and climate fund portals and Treasury; each appears here as soon as it is found, marked "Not yet checked".';
+  $('#mtable').innerHTML='<thead><tr><th>County</th>'+SECTORS.map(s=>'<th class="n">'+s[0]+'</th>').join('')+'<th class="n">All investments</th></tr></thead><tbody>'+ECON.map(r=>{const l=invFor(r.c);return '<tr><td>'+r.c+'</td>'+SECTORS.map(s=>'<td class="n">'+(l.filter(x=>arr(x.sectors).includes(s[0])).length||'·')+'</td>').join('')+'<td class="n">'+(l.length||'·')+'</td></tr>'}).join('')+'</tbody>';
+ }
+ mapSide(byC,Yshow);
+}
+function mapSide(byC,Yshow){
+ const box=$('#mapside'),c=M.sel;
+ if(!c){box.innerHTML='<p class="mute">Tap or select a county on the map to see what it needs and who pays.</p>';return}
+ const r=ECON.find(e=>e.c===c),x=byC[c],recN=shown().filter(y=>arr(y.counties).includes(c)).length;
+ let h='<h3>'+esc(c)+'</h3>';
+ if(M.mode==='green'){
+  const t=x.inv||1,w=v=>Math.max(0,Math.min(100,v/t*100)).toFixed(1),st=x.stageAt(Yshow);
+  h+='<p><i class="sw" style="background:'+STAGES_G[st][1]+'"></i><b>'+STAGES_G[st][0]+'</b> after '+Yshow+' years. With about <b>'+fmtM(x.inv)+' a year</b>, '+esc(c)+' turns green in <b>'+(x.yrs?'about '+x.yrs+' years':'more than '+M.y+' years')+'</b>. To be green in '+M.y+' years it needs about '+fmtM(x.base*grow(M.y)/M.y)+' a year.</p>'+
+  '<div class="stackbar" role="img" aria-label="Funding mix"><i class="s1" style="width:'+w(x.cty)+'%"></i><i class="s4" style="width:'+w(x.nat)+'%"></i><i class="s2" style="width:'+w(x.ef)+'%"></i><i class="s3" style="width:'+w(x.ext)+'%"></i></div>'+
+  '<ul class="crit"><li><i class="sw s1"></i>Own budget at '+M.bud+'% of KSh '+(ES[c]||0)+'bn: '+fmtM(x.cty)+'</li><li><i class="sw s4"></i>National government at '+M.nat+'%: '+fmtM(x.nat)+'</li><li><i class="sw s2"></i>Equalisation Fund: '+(EFK[c]?fmtM(x.ef)+' (KSh '+EFK[c]+'bn)':'not yet found')+'</li><li><i class="sw s3"></i>External: '+fmtM(x.ext)+' a year (needed for green in '+M.y+' years: '+fmtM(x.needed)+')</li><li><b>Pays back: about '+fmtM(x.upT)+' more output a year by year '+M.y+' (+'+pct(x.upPct)+')'+(x.payback?', paid for itself by year '+x.payback:'')+'</b></li></ul>'+
+  '<h4 class="sec">Where the money goes each year</h4><ul class="crit">'+SECTORS.map((s,i)=>'<li>'+s[0]+': <b>'+fmtM(x.inv*econF()*shareOf(i))+'</b></li>').join('')+'</ul>'+
+  '<p class="mute">Plus about '+fmtM(x.inv*(1-econF()))+' a year to catch up on education, health, roads, electricity, water and sanitation.</p>'+pubLine(c)+
+  '<h4 class="sec">Green pathways</h4><ul>'+r.p.map(y=>'<li>'+esc(y)+'</li>').join('')+'</ul>';
+ }else{
+  const l=invFor(c);h+=pubLine(c);
+  h+=l.length?'<ul class="crit">'+l.map(y=>'<li><a href="#register" data-jump="'+esc(y.id)+'">'+esc(y.title)+'</a>'+(y._early?' <span class="chip unck">Not yet checked</span>':'')+'<br><span class="mute">'+esc([y.funder,implName(y),arr(y.pillars).join(', '),money(y),y.years,arr(y.counties).length>1?'covers '+arr(y.counties).length+' counties':''].filter(Boolean).join(' · '))+'</span></li>').join('')+'</ul>':'<p class="mute">No published investments for this county yet.</p>';
+ }
+ h+='<button class="btn" data-c="'+esc(c)+'" data-k="">All '+recN+' records for '+esc(c)+'</button>';
+ box.innerHTML=h;
+}
+function pubLine(c){const l=invFor(c).filter(x=>x.amount&&x.coverage!=='Covers this county; amount not split');const by={};l.forEach(x=>{const k=x.currency||'';by[k]=(by[k]||0)+Number(x.amount)});const parts=Object.entries(by).map(([k,v])=>(k+' '+Math.round(v).toLocaleString('en-US')).trim());const sec={};invFor(c).forEach(x=>arr(x.sectors).forEach(s=>{sec[s]=(sec[s]||0)+1}));return '<p class="mute"><b>External money published so far:</b> '+(parts.length?parts.join(' + ')+' with an amount for this county':'no amounts published for this county yet')+(Object.keys(sec).length?'; by sector: '+Object.entries(sec).map(([s,n])=>s+' ('+n+')').join(', '):'')+'.</p>'}
+const GCRIT=SECTORS.map(s=>s[0]+': '+s[3]);
+function mapStop(){if(M.timer){clearInterval(M.timer);M.timer=null;const b=$('#mplay');if(b)b.textContent='Play years';mapView()}}
+function mapPlay(){if(M.timer){mapStop();return}if(matchMedia('(prefers-reduced-motion: reduce)').matches){mapView();return}M.yPlay=0;$('#mplay').textContent='Pause';M.timer=setInterval(()=>{if(M.yPlay>=M.y){mapStop();return}M.yPlay++;mapView()},450);mapView()}
+function filtersUI(){
+ const opt=(v,l,s)=>'<option value="'+esc(v)+'"'+(v===s?' selected':'')+'>'+esc(l)+'</option>';
+ $('#fc').innerHTML=opt('','All counties',F.county)+COUNTIES.map(c=>opt(c,c,F.county)).join('');
+ $('#fk').innerHTML=opt('','All types',F.kind)+KINDS.map(k=>opt(k[0],k[1],F.kind)).join('');
+ $('#ft').innerHTML=opt('','All themes',F.theme)+THEMES.map(t=>opt(t,t,F.theme)).join('');
+ $('#fl').value=F.lens;$('#fq').value=F.q;
+ $('#pc').innerHTML=opt('','All counties',PF.county)+COUNTIES.map(c=>opt(c,c,PF.county)).join('');
+ $('#pp').innerHTML=opt('','All pillars',PF.pillar)+PILLARS.map(c=>opt(c,c,PF.pillar)).join('');
+ $('#pch').innerHTML=opt('','Anyone',PF.channel)+CHANNELS.map(c=>opt(c,c,PF.channel)).join('');
+}
+function addView(){
+ let msg,btns='';
+ if(!db){msg='Sign in to claude.ai to suggest items. You can also leave a comment anywhere on this page.';if(cm)btns='<button class="btn pri" data-act="addcomment">Suggest in a comment</button>'}
+ else if(isEditor){msg='As a reviewer, what you add goes straight to the review queue and is approved like any other item.';btns='<button class="btn pri" data-act="add">Send to the review queue</button>'}
+ else{msg='Your suggestion goes to the administrator, who sends it to the right reviewer panel. Organisations are named only where a public document names them, or with their consent.';btns='<button class="btn pri" data-act="add">Send suggestion</button>'+(cm?'<button class="btn" data-act="addcomment">Or suggest in a comment</button>':'')}
+ $('#addSub').textContent=msg;$('#addacts').innerHTML=btns;
+ if(db&&!$('#addform').innerHTML.trim())$('#addform').innerHTML=formHTML({});
+ if(!db)$('#addform').innerHTML='';
+}
+function renderAll(force){
+ figs();grid();runlog();economy();panelView();mapView();
+ if(editing()&&!force){pendingRender=true;return}
+ pendingRender=false;review();register();inbox();addView();names();
+}
+async function names(){if(!user)return;const els=[...document.querySelectorAll('.who')];const ids=[...new Set(els.map(e=>e.dataset.uid))].filter(Boolean);if(!ids.length)return;try{const ps=await user.profiles(ids);els.forEach(e=>{const p=ps&&ps[e.dataset.uid];if(p&&p.name)e.textContent=p.name})}catch(err){}}
+
+function chk(n,v,on){return '<label class="ck"><input type="checkbox" name="'+n+'" value="'+esc(v)+'"'+(on.includes(v)?' checked':'')+'>'+esc(v)+'</label>'}
+function sel(n,opts,cur,blank){return '<select name="'+n+'">'+(blank!==undefined?'<option value="">'+esc(blank)+'</option>':'')+opts.map(o=>'<option'+(o===cur?' selected':'')+'>'+esc(o)+'</option>').join('')+'</select>'}
+function formHTML(d){
+ const cs=arr(d.counties),ts=arr(d.themes),ls=arr(d.links),ps=arr(d.pillars);
+ const hasFund=!!(d.funder||d.implementer||d.amount||ps.length||arr(d.sectors).length||d.stage||['investment','fund','audit'].includes(d.kind));
+ return '<div class="form"><label>Title<input name="title" value="'+esc(d.title)+'"></label>'+
+ '<div class="row3"><label>Type<select name="kind">'+KINDS.map(k=>'<option value="'+k[0]+'"'+(d.kind===k[0]?' selected':'')+'>'+k[1]+'</option>').join('')+'</select></label>'+
+ '<label>Date<input name="date" value="'+esc(d.date)+'" placeholder="2026-07-23 or 2026"></label>'+
+ '<label>Lens<select name="lens"><option value="">None</option>'+LENSES.map(l=>'<option'+(d.lens===l?' selected':'')+'>'+l+'</option>').join('')+'</select></label></div>'+
+ '<div class="row3"><label>Status<input name="status" value="'+esc(d.status)+'" placeholder="Ongoing, judgment delivered, enacted"></label><label>Level<input name="level" value="'+esc(d.level)+'" placeholder="PhD thesis, journal article"></label><label>Origin<input name="origin" value="'+esc(d.origin)+'" placeholder="Kenyan university"></label></div>'+
+ '<fieldset><legend>Counties</legend>'+COUNTIES.map(c=>chk('counties',c,cs)).join('')+'</fieldset>'+
+ '<fieldset><legend>Themes</legend>'+THEMES.map(t=>chk('themes',t,ts)).join('')+'</fieldset>'+
+ '<details class="more"'+(hasFund?' open':'')+'><summary>Funding details (investments, county funds, audits)</summary><div class="form">'+
+ '<fieldset><legend>Pillars</legend>'+PILLARS.map(p=>chk('pillars',p,ps)).join('')+'</fieldset>'+
+ '<fieldset><legend>Green sectors</legend>'+SECTORS.map(s=>chk('sectors',s[0],arr(d.sectors))).join('')+'</fieldset>'+
+ '<div class="row3"><label>Funder<input name="funder" value="'+esc(d.funder)+'" placeholder="World Bank, EU, OCHA pooled fund"></label><label>Delivered by<input name="implementer" value="'+esc(d.implementer)+'"></label><label>Type of organisation delivering'+sel('channel',CHANNELS,d.channel,'Not known')+'</label></div>'+
+ '<label>Public document naming who delivers it <small>leave empty if none: the name then stays hidden until consent</small><input name="implementerSource" value="'+esc(d.implementerSource)+'" placeholder="https://"></label>'+
+ '<div class="row3"><label>Amount<input name="amount" inputmode="decimal" value="'+esc(d.amount)+'"></label><label>Currency'+sel('currency',['KSh','USD','EUR','GBP'],d.currency,'')+'</label><label>Amount type'+sel('amountType',AMT,d.amountType,'')+'</label></div>'+
+ '<div class="row3"><label>Years<input name="years" value="'+esc(d.years)+'" placeholder="2024 to 2027"></label><label>County coverage'+sel('coverage',COVER,d.coverage,'')+'</label><label>Money stage'+sel('stage',STAGES,d.stage,'Not a budget step')+'</label></div>'+
+ (isEditor?'<label class="ck"><input type="checkbox" name="anonymise"'+(d.anonymise?' checked':'')+'> Hide the delivering organisation’s name for safety</label>':'')+
+ '</div></details>'+
+ '<label>Summary<textarea name="summary" rows="3">'+esc(d.summary)+'</textarea></label>'+
+ '<label>Sources <small>one per line: name | link</small><textarea name="sources" rows="2">'+esc(arr(d.sources).map(s=>[s.name,s.url].filter(Boolean).join(' | ')).join('\n'))+'</textarea></label>'+
+ '<label>Linked records <small>hold Ctrl or Cmd to pick several</small><select name="links" multiple size="5">'+recs.filter(x=>x.id!==d.id).map(x=>'<option value="'+esc(x.id)+'"'+(ls.includes(x.id)?' selected':'')+'>'+esc(x.title)+'</option>').join('')+'</select></label>'+
+ '<label>Notes <small>what changed and why, or anything reviewers should know</small><textarea name="notes" rows="2">'+esc(d.notes)+'</textarea></label></div>';
+}
+function readForm(root){
+ const v=n=>{const e=root.querySelector('[name="'+n+'"]');return e?e.value.trim():''};
+ const ch=n=>[...root.querySelectorAll('input[name="'+n+'"]:checked')].map(i=>i.value);
+ const ln=root.querySelector('[name="links"]');const an=root.querySelector('[name="anonymise"]');
+ const amt=v('amount').replace(/[,\s]/g,'');
+ const out={title:v('title'),kind:v('kind'),date:v('date'),lens:v('lens'),status:v('status'),level:v('level'),origin:v('origin'),summary:v('summary'),notes:v('notes'),counties:ch('counties'),themes:ch('themes'),pillars:ch('pillars'),sectors:ch('sectors'),
+ funder:v('funder'),implementer:v('implementer'),channel:v('channel'),implementerSource:safeUrl(v('implementerSource')),amount:amt&&!isNaN(+amt)?+amt:'',currency:v('currency'),amountType:v('amountType'),years:v('years'),coverage:v('coverage'),stage:v('stage'),
+ sources:v('sources').split('\n').map(l=>l.trim()).filter(Boolean).map(l=>{const p=l.split('|').map(s=>s.trim());return p.length>1?{name:p[0],url:p.slice(1).join('|')}:(/^https?:/i.test(p[0])?{name:'',url:p[0]}:{name:p[0],url:''})}),
+ links:ln?[...ln.selectedOptions].map(o=>o.value):[]};
+ if(an)out.anonymise=an.checked;
+ return out;
+}
+const STRIP=['id','why','batch','foundAt','confidence','votes','assigned','targetId','suggestionId'];
+function toRecord(p,uids,override){const b=Object.assign({},p);STRIP.forEach(k=>delete b[k]);b.tier=tierOf(p);b.panel=panelOf(p);b.approvedBy=uids;b.approvedAt=now();b.verifiedBy=uids[0]||me;b.verifiedAt=b.approvedAt;b.addedVia=p.batch?'approved from '+p.batch:'approved from review';b.fingerprint=p.fingerprint||'';if(override)b.adminApproved=true;return b}
+const fpOf=p=>String(p.fingerprint||p.id).replace(/[^A-Za-z0-9_.~:@+-]/g,'-').slice(0,180);
+async function approve(p,uids,override){try{await db.collection('records').doc(p.targetId||p.id).set(toRecord(p,uids,override));await db.collection('pending').doc(p.id).delete();if(p.suggestionId){try{await db.collection('suggestions').doc(p.suggestionId).update({status:'approved'})}catch(e){}}return true}catch(e){fail(e);return false}}
+async function closeReject(p,uids){try{if(!p.targetId)await db.collection('rejected').doc(fpOf(p)).set({title:p.title||'',url:((arr(p.sources)[0])||{}).url||'',reason:votes(p).map(e=>e[1].note).filter(Boolean).join('; '),by:uids,at:now()});await db.collection('pending').doc(p.id).delete();if(p.suggestionId){try{await db.collection('suggestions').doc(p.suggestionId).update({status:'declined',decision:'Rejected by reviewers'})}catch(e){}}return true}catch(e){fail(e);return false}}
+async function castVote(p,v,note){
+ const mv={v:v,note:note||'',at:now(),admin:!!isOwner};
+ try{await db.collection('pending').doc(p.id).update({votes:{[me]:mv}})}catch(e){fail(e);return}
+ const all=Object.assign({},p.votes||{});all[me]=mv;const q=Object.assign({},p,{votes:all});
+ const N=need(q),c=conf(q),r=rejs(q);
+ if(c.length>=N){if(tierOf(q)===3&&!q.safetyOk){say('Approval recorded. This item now waits for the administrator’s safety check.');return}if(await approve(p,c))say('Approved and moved to the register.')}
+ else if(r.length>=N){if(await closeReject(p,r))say('Rejected by reviewers.')}
+ else say(v==='confirm'?'Your approval is recorded. '+(N-c.length)+' more needed.':'Your rejection is recorded.');
+}
+function pendingBody(d,extra){return Object.assign({},d,{votes:{},assigned:[],foundAt:now(),confidence:'',fingerprint:''},extra||{})}
+function hits(list){const box=$('#phits');if(!box)return;box.innerHTML='';list.filter(h=>!panel.some(p=>p.id===h.id)).forEach(h=>{const row=document.createElement('div');row.className='prow';const s=document.createElement('span');s.textContent=h.name;const b=document.createElement('button');b.className='btn';b.textContent='Add to panels';b.dataset.act='padd';b.dataset.uid=h.id;row.append(s,b);box.append(row)})}
+
+document.addEventListener('input',async e=>{
+ if(e.target.id==='uplift'){uplift=+e.target.value;economy()}
+ if(e.target.id==='mbud'){mapStop();M.bud=+e.target.value;mapView()}
+ if(e.target.id==='mnat'){mapStop();M.nat=+e.target.value;mapView()}
+ if(e.target.id==='mextr'){mapStop();M.ext=+e.target.value;mapView()}
+ if(e.target.id==='myears'){mapStop();M.y=+e.target.value;mapView()}
+ for(const [id,k,lo,hi] of [['mback','back',0,20000],['mclim','clim',0,10],['mfx','fx',50,300],['mret','ret',0,100]])if(e.target.id===id){const v=+e.target.value;if(v>=lo&&v<=hi){M[k]=v;mapView()}}
+ if(e.target.dataset&&e.target.dataset.sh!==undefined){const i=+e.target.dataset.sh,v=Math.max(0,+e.target.value||0);M.sh[i]=v;mapView();const n=document.querySelector('#mmix input[data-sh="'+i+'"]');if(n)n.focus()}
+ if(e.target.id==='mneed'){const v=+e.target.value;if(v>=100&&v<=20000){M.need=v;mapView()}}
+ if(e.target.id==='psearch'&&user){hits(await user.search(e.target.value.trim()))}
+});
+document.addEventListener('focusin',async e=>{if(e.target.id==='psearch'&&user&&!e.target.value){const h=await user.search('');if(!e.target.value)hits(h)}});
+
+const pickCounty=t=>{const p=t.closest&&t.closest('path.mc');if(!p)return false;M.sel=p.dataset.county;mapView();const s=$('#mapside');if(s&&matchMedia('(max-width:800px)').matches)s.scrollIntoView({block:'nearest'});return true};
+document.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&pickCounty(e.target))e.preventDefault()});
+document.addEventListener('click',async e=>{
+ if(pickCounty(e.target))return;
+ const b=e.target.closest('button,a[data-jump]');if(!b)return;
+ if(b.dataset.up){uplift=+b.dataset.up;$('#uplift').value=uplift;economy();return}
+ if(b.dataset.mp){mapStop();M.bud=M.nat=+b.dataset.mp;$('#mbud').value=M.bud;$('#mnat').value=M.nat;mapView();return}
+ if(b.dataset.me){mapStop();M.ext=+b.dataset.me;$('#mextr').value=M.ext;mapView();return}
+ if(b.dataset.my){mapStop();M.y=+b.dataset.my;$('#myears').value=M.y;mapView();return}
+ if(b.id==='mdom'||b.id==='mext'){mapStop();M.ext=b.id==='mext';mapView();return}
+ if(b.id==='mgreen'||b.id==='mfund'){mapStop();M.mode=b.id==='mgreen'?'green':'fund';mapView();return}
+ if(b.id==='mplay'){mapPlay();return}
+ if(b.dataset.c!==undefined&&!b.dataset.act){F.county=b.dataset.c;F.kind=b.dataset.k||'';F.theme='';F.lens='';F.q='';filtersUI();register();go('register');return}
+ if(b.dataset.rc){go('review');return}
+ if(b.dataset.jump){e.preventDefault();F.county='';F.kind='';F.theme='';F.lens='';F.q='';filtersUI();register();go('register');const d=document.getElementById('r-'+b.dataset.jump);if(d){d.open=true;d.scrollIntoView({block:'center'})}return}
+ if(b.id==='clear'){F.county='';F.kind='';F.theme='';F.lens='';F.q='';filtersUI();register();return}
+ const act=b.dataset.act;if(!act)return;
+ if(act==='comment'){openComment(b.closest('.slip,.rec,.card'));return}
+ if(act==='addcomment'){openComment($('#v-add'));return}
+ if(act==='gorev'){RB='';RS='all';$('#rshow').value='all';review();names();go('review');setTimeout(()=>{const s=document.querySelector('.slip[data-id="'+CSS.escape(b.dataset.id)+'"]');if(s)s.scrollIntoView({block:'center'})},50);return}
+ if(act==='csv'){const rows=[['Title','Type','Counties','Themes','Lens','Pillars','Funder','Delivered by','Amount','Currency','Amount type','Years','Status','Date','Summary','Sources','Checked by a reviewer']].concat(filtered().map(r=>[r.title,kindName(r.kind),arr(r.counties).join('; '),arr(r.themes).join('; '),r.lens||'',arr(r.pillars).join('; '),r.funder||'',r.implementer?implName(r):'',r.amount||'',r.currency||'',r.amountType||'',r.years||'',r.status||'',r.date||'',r.summary||'',arr(r.sources).map(s=>s.url||s.name).join(' '),r._early?'No':'Yes']));const csv=rows.map(r=>r.map(c=>'"'+String(c??'').replace(/"/g,'""')+'"').join(',')).join('\n');try{await navigator.clipboard.writeText(csv);say('Copied '+(rows.length-1)+' records. Paste them into a spreadsheet.')}catch(err){say('The browser blocked copying.',true)}return}
+ if(!db)return;
+ const se=b.closest('.slip'),re=b.closest('.rec'),ce=b.closest('.card[data-sid]'),pe=b.closest('.prow');
+ if(se){const p=pend.find(x=>x.id===se.dataset.id);if(!p)return;const box=se.querySelector('.editbox');const note=(se.querySelector('.note')||{value:''}).value.trim();
+  if(act==='vconfirm'||act==='vreject'){b.disabled=true;await castVote(p,act==='vconfirm'?'confirm':'reject',note);b.disabled=false}
+  else if(act==='finalize'){b.disabled=true;const c=conf(p),r=rejs(p);if(okApprove(p)?await approve(p,c):await closeReject(p,r))say(okApprove(p)?'Moved to the register.':'Closed as rejected.');else b.disabled=false}
+  else if(act==='raise'){b.disabled=true;try{await db.collection('pending').doc(p.id).update({tier:Math.min(3,tierOf(p)+1),raisedBy:me,raisedAt:now()});say('Raised to tier '+Math.min(3,tierOf(p)+1)+'.')}catch(err){fail(err);b.disabled=false}}
+  else if(act==='settier'){const t=+(se.querySelector('.tiersel')||{}).value;if(!(t>=1&&t<=3))return;b.disabled=true;try{await db.collection('pending').doc(p.id).update({tier:t});say('Tier set to '+t+'.')}catch(err){fail(err);b.disabled=false}}
+  else if(act==='setpanel'){const k=(se.querySelector('.pansel')||{}).value;if(!k)return;b.disabled=true;try{await db.collection('pending').doc(p.id).update({panel:k});say('Sent to the '+panelName(k)+' panel.')}catch(err){fail(err);b.disabled=false}}
+  else if(act==='safety'){b.disabled=true;try{await db.collection('pending').doc(p.id).update({safetyOk:true,safetyBy:me,safetyAt:now()});const q=Object.assign({},p,{safetyOk:true});if(conf(q).length>=need(q)){if(await approve(q,conf(q)))say('Safety check passed; approved and moved to the register.')}else say('Safety check recorded. The item still needs reviewer approvals.')}catch(err){fail(err);b.disabled=false}}
+  else if(act==='edit'){box.innerHTML=formHTML(p)+'<div class="acts"><button class="btn pri" data-act="savepend">Save changes</button><button class="btn" data-act="cancel">Cancel</button></div><p class="mute">Saving clears the votes so far, because reviewers need to see the new version.</p>'}
+  else if(act==='savepend'){const d=readForm(box);if(!d.title){say('Add a title first.',true);return}b.disabled=true;try{const body=Object.assign({},p,d,{votes:{},safetyOk:false,editedBy:me,editedAt:now()});delete body.id;await db.collection('pending').doc(p.id).set(body);box.innerHTML='';say('Saved. Votes were reset.');renderAll(true)}catch(err){fail(err);b.disabled=false}}
+  else if(act==='cancel'){box.innerHTML='';if(pendingRender)renderAll()}
+  else if(act==='assign'){const ids=[...se.querySelectorAll('input[name="asg"]:checked')].map(i=>i.value);b.disabled=true;try{await db.collection('pending').doc(p.id).update({assigned:ids});say('Assignment saved.')}catch(err){fail(err)}b.disabled=false}
+  else if(act==='override'){b.disabled=true;if(await approve(Object.assign({},p,{safetyOk:true}),[...new Set([...conf(p),me])],true))say('Approved by the administrator and moved to the register.');else b.disabled=false}
+  else if(act==='oreject'){if(b.dataset.armed!=='1'){b.dataset.armed='1';b.textContent='Click again to reject';return}b.disabled=true;if(await closeReject(p,[...new Set([...rejs(p),me])]))say('Rejected by the administrator.');else b.disabled=false}
+  return}
+ if(re){const r=recs.find(x=>x.id===re.dataset.id);if(!r)return;const box=re.querySelector('.editbox');
+  if(act==='suggest'){box.innerHTML=formHTML(r)+'<div class="acts"><button class="btn pri" data-act="sendedit">'+(isEditor?'Send edit to the review queue':'Send suggested edit')+'</button><button class="btn" data-act="cancel">Cancel</button></div>'}
+  else if(act==='sendedit'){const d=readForm(box);if(!d.title){say('Add a title first.',true);return}b.disabled=true;try{
+    if(isEditor){await db.collection('pending').doc('edit-'+r.id.slice(0,60)+'-'+Date.now()).set(pendingBody(d,{targetId:r.id,tier:Math.max(2,tierOf(r)),panel:panelOf(r),batch:'Edits to existing records',proposedBy:me,why:'Compare with the current record before approving.'}))}
+    else{await db.collection('suggestions').doc().set(Object.assign(d,{targetId:r.id,by:me,at:now(),status:'new'}))}
+    box.innerHTML='';say(isEditor?'Sent to the review queue.':'Thank you. Your suggestion is with the administrator.');renderAll(true)}catch(err){fail(err);b.disabled=false}}
+  else if(act==='redit'){box.innerHTML=formHTML(r)+'<div class="acts"><button class="btn pri" data-act="rsave">Save</button><button class="btn" data-act="cancel">Cancel</button></div>'}
+  else if(act==='cancel'){box.innerHTML='';if(pendingRender)renderAll()}
+  else if(act==='rsave'){const d=readForm(box);if(!d.title){say('Add a title first.',true);return}b.disabled=true;try{const body=Object.assign({},r,d,{editedBy:me,editedAt:now()});delete body.id;await db.collection('records').doc(r.id).set(body);box.innerHTML='';say('Saved.');renderAll(true)}catch(err){fail(err);b.disabled=false}}
+  else if(act==='unconfirm'){b.disabled=true;try{const body=Object.assign({},r);['id','verifiedBy','verifiedAt','approvedBy','approvedAt','adminApproved','addedVia'].forEach(k=>delete body[k]);await db.collection('pending').doc(r.id).set(pendingBody(body,{batch:'Sent back for review',why:'Sent back from the register for another check.'}));await db.collection('records').doc(r.id).delete();say('Moved back to the review queue.')}catch(err){fail(err);b.disabled=false}}
+  else if(act==='del'){if(b.dataset.armed!=='1'){b.dataset.armed='1';b.textContent='Click again to delete';setTimeout(()=>{if(b.isConnected){b.dataset.armed='';b.textContent='Delete'}},4000);return}b.disabled=true;try{await db.collection('records').doc(r.id).delete();say('Deleted.')}catch(err){fail(err);b.disabled=false}}
+  return}
+ if(ce){const s=sugg.find(x=>x.id===ce.dataset.sid);if(!s)return;
+  if(act==='route'){b.disabled=true;try{const d={};['kind','title','counties','themes','lens','level','origin','status','date','summary','sources','links','notes','pillars','sectors','funder','implementer','channel','implementerSource','amount','currency','amountType','years','coverage','stage'].forEach(k=>{if(s[k]!==undefined)d[k]=s[k]});const pid='sg-'+s.id.slice(0,80);await db.collection('pending').doc(pid).set(pendingBody(d,{targetId:s.targetId||'',suggestionId:s.id,proposedBy:s.by||'',batch:'Suggestions from contributors',why:s.targetId?'Proposed edit from a contributor; compare with the current record.':'Suggested by a contributor; check the source.'}));await db.collection('suggestions').doc(s.id).update({status:'in review',pendingId:pid,routedBy:me,routedAt:now()});say('Sent to the '+panelName(panelOf(d))+' panel.')}catch(err){fail(err);b.disabled=false}}
+  else if(act==='decline'){b.disabled=true;try{await db.collection('suggestions').doc(s.id).update({status:'declined',decision:((ce.querySelector('.note')||{}).value||'').trim(),routedBy:me,routedAt:now()});say('Declined.')}catch(err){fail(err);b.disabled=false}}
+  return}
+ if(act==='padd'){b.disabled=true;try{await db.collection('panel').doc(b.dataset.uid).set({addedBy:me,addedAt:now(),panels:PANELS.map(x=>x[0])});say('Added to all three panels. Untick the ones that do not apply, and give them Editor access in the Share menu.');const box=$('#phits');if(box)box.innerHTML='';const s=$('#psearch');if(s)s.value=''}catch(err){fail(err);b.disabled=false}return}
+ if(act==='psave'&&pe){const ks=[...pe.querySelectorAll('input[name="pp"]:checked')].map(i=>i.value);if(!ks.length){say('Tick at least one panel, or remove the reviewer.',true);return}b.disabled=true;try{await db.collection('panel').doc(pe.dataset.uid).update({panels:ks});say('Panels saved.')}catch(err){fail(err);b.disabled=false}return}
+ if(act==='prem'&&pe){if(b.dataset.armed!=='1'){b.dataset.armed='1';b.textContent='Click again to remove';return}b.disabled=true;try{await db.collection('panel').doc(pe.dataset.uid).delete();say('Removed from the panels.')}catch(err){fail(err);b.disabled=false}return}
+ if(act==='bulk'){
+  if(b.dataset.armed!=='1'){b.dataset.armed='1';b.textContent='Click again to approve all as administrator';return}
+  const list=reviewList();b.disabled=true;let n=0;
+  for(const p of list){if(!(await approve(Object.assign({},p,{safetyOk:true}),[...new Set([...conf(p),me])],true)))break;n++;b.textContent='Approving '+n+' of '+list.length;await sleep(300)}
+  say(n+' items approved by the administrator.');renderAll(true);return}
+ if(act==='add'){const box=$('#addform');const d=readForm(box);if(!d.title){say('Add a title first.',true);return}b.disabled=true;try{
+   if(isEditor)await db.collection('pending').doc().set(pendingBody(d,{batch:'Added by reviewers',proposedBy:me,why:'Added by a reviewer; another reviewer must check it.'}));
+   else await db.collection('suggestions').doc().set(Object.assign(d,{by:me,at:now(),status:'new'}));
+   box.innerHTML=formHTML({});say(isEditor?'Added to the review queue.':'Thank you. Your suggestion is with the administrator.')}catch(err){if(err&&err.code==='invalid_argument'){say('Your access lets you comment but not submit forms. Use "Or suggest in a comment".',true)}else fail(err)}b.disabled=false;return}
+});
+$('#rbatch').addEventListener('change',e=>{RB=e.target.value;review();names()});
+$('#rshow').addEventListener('change',e=>{RS=e.target.value;review();names()});
+$('#ishow').addEventListener('change',e=>{IS=e.target.value;inbox();names()});
+$('#fc').addEventListener('change',e=>{F.county=e.target.value;register();names()});
+$('#fk').addEventListener('change',e=>{F.kind=e.target.value;register();names()});
+$('#ft').addEventListener('change',e=>{F.theme=e.target.value;register();names()});
+$('#fl').addEventListener('change',e=>{F.lens=e.target.value;register();names()});
+$('#pc').addEventListener('change',e=>{PF.county=e.target.value;partnersView();names()});
+$('#pp').addEventListener('change',e=>{PF.pillar=e.target.value;partnersView();names()});
+$('#pch').addEventListener('change',e=>{PF.channel=e.target.value;partnersView();names()});
+let qt;$('#fq').addEventListener('input',e=>{clearTimeout(qt);qt=setTimeout(()=>{F.q=e.target.value.trim();register();names()},200)});
+
+(()=>{const ex=$('#explain'),ag=$('#exagain');let shut=false;try{shut=localStorage.getItem('hubExplainClosed')==='1'}catch(e){}const set=c=>{ex.hidden=c;ag.hidden=!c;try{localStorage.setItem('hubExplainClosed',c?'1':'0')}catch(e){}};ex.hidden=shut;ag.hidden=!shut;$('#exclose').addEventListener('click',()=>set(true));$('#exopen').addEventListener('click',()=>{set(false);ex.scrollIntoView({block:'start'})})})();
+filtersUI();show(location.hash.slice(1));renderAll(true);
+(async()=>{
+ if(window.HUB_PUBLIC){
+  recs=window.HUB_PUBLIC.items.map(i=>Object.assign({tier:1,_early:true},i));pend=[];gotR=gotP=true;
+  ['t-review','t-add','t-inbox','t-panel'].forEach(id=>{const e=document.getElementById(id);if(e)e.hidden=true});
+  ['#nPend','#nPanel'].forEach(s=>{const f=$(s);if(f)f.closest('.fig').hidden=true});
+  $('#status').innerHTML='This is the public, read-only copy of the hub, updated weekly. Items marked "Not yet checked" come from official or published sources and are still waiting for a reviewer. To comment or suggest, open the <a href="https://claude.ai/artifact/GnhYJfm2wyMUk3mZjHHnkT" target="_blank" rel="noopener">full hub on claude.ai</a>.';
+  renderAll(true);show(location.hash.slice(1));return}
+ const timer=setTimeout(()=>{if(!gotR||!gotP)$('#status').textContent='The shared register cannot be reached yet. It will appear when the connection returns.'},10000);
+ [db,user,cm]=await Promise.all([use('db'),use('user'),use('comments')]);
+ if(user){try{me=(await user.id())||''}catch(err){}try{isOwner=!!(await user.isOwner())}catch(err){}try{isEditor=isOwner||!!(await user.canEdit())}catch(err){}}
+ if(!db){clearTimeout(timer);$('#status').textContent='Sign in to claude.ai to see the shared register and comment.';renderAll(true);return}
+ const settle=()=>{if(gotR&&gotP){clearTimeout(timer);$('#status').textContent='';if(!routed&&!location.hash){routed=true;show(pend.length&&canVote()?'review':'register')}}};
+ const err=()=>{clearTimeout(timer);$('#status').textContent='The register could not load. Reload the page to try again.'};
+ db.collection('records').onSnapshot(s=>{recs=s.docs.map(d=>Object.assign({id:d.id},d.data()));if(!s.metadata.fromCache)gotR=true;settle();renderAll()},err);
+ db.collection('pending').onSnapshot(s=>{pend=s.docs.map(d=>Object.assign({id:d.id},d.data()));if(!s.metadata.fromCache)gotP=true;settle();renderAll()},err);
+ db.collection('panel').onSnapshot(s=>{panel=s.docs.map(d=>Object.assign({id:d.id},d.data()));renderAll()},()=>{});
+ db.collection('suggestions').onSnapshot(s=>{sugg=s.docs.map(d=>Object.assign({id:d.id},d.data()));renderAll()},()=>{});
+ db.collection('runs').orderBy('at','desc').limit(8).onSnapshot(s=>{runs=s.docs.map(d=>Object.assign({id:d.id},d.data()));figs();runlog()},()=>{});
+})();
+}
+
+</script>
+</body>
+</html>
